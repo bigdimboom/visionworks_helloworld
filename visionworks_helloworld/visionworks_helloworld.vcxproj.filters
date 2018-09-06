@@ -4,8 +4,34 @@
     <Filter Include="src">
       <UniqueIdentifier>{81d925ba-9049-4dfc-bb3f-45915c378dd5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\engine">
+      <UniqueIdentifier>{b614c884-eba9-44eb-8a46-5cad1956e710}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\engine\event">
+      <UniqueIdentifier>{ec2ed1a6-cb72-4675-803d-3b87d7985bb4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\engine\application">
+      <UniqueIdentifier>{18c2d901-d368-470e-8aa1-84db39470992}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\engine\graphics">
+      <UniqueIdentifier>{1e20681d-2f19-4319-b00b-048adb2faaaa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.main.cpp" />
+    <ClCompile Include="src\engine\graphics\vulkan_window.cpp">
+      <Filter>src\engine\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\graphics\vulkan_context.cpp">
+      <Filter>src\engine\graphics</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\engine\graphics\vulkan_window.h">
+      <Filter>src\engine\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\graphics\vulkan_context.h">
+      <Filter>src\engine\graphics</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

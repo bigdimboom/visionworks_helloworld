@@ -5,6 +5,9 @@
 #include <SDL2/SDL.h>
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
+#include <vulkan/vulkan.hpp>
+
+#include "src/engine/graphics/vulkan_context.h"
 
 
 int main(int argc, const char** argv)
@@ -12,17 +15,7 @@ int main(int argc, const char** argv)
 	glm::mat4 matrix(1.0);
 	std::cout << glm::to_string(matrix) << "\n";
 
-	if (SDL_Init(SDL_INIT_VIDEO) != 0)
-	{
-		SDL_LogError(SDL_LOG_CATEGORY_SYSTEM, "sdl init error.\n");
-		return EXIT_FAILURE;
-	}
-
-	if (SDL_Vulkan_LoadLibrary(nullptr) != 0)
-	{
-		SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "sdl vulkan library init error.\n");
-		return EXIT_FAILURE;
-	}
+	graphics::VulkanContext::initialize();
 
 	auto window = SDL_CreateWindow(
 		"test",
@@ -37,6 +30,22 @@ int main(int argc, const char** argv)
 		SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "sdl window create error.\n");
 		return EXIT_FAILURE;
 	}
+
+	auto instanceExtensionProp = vk::enumerateInstanceExtensionProperties();
+	auto instanceLayerProp = vk::enumerateInstanceLayerProperties();
+	auto instanceVersion = vk::enumerateInstanceVersion();
+
+	unsigned extensionCount = 0;
+	std::vector<const char*> vulkanInstanceExtensions;
+	SDL_Vulkan_GetInstanceExtensions(window, &extensionCount, nullptr);
+	vulkanInstanceExtensions.resize(extensionCount);
+	SDL_Vulkan_GetInstanceExtensions(window, &extensionCount, vulkanInstanceExtensions.data());
+
+	std::vector<const char*> vulkanInstanceLayers;
+
+	vulkanInstanceLayers.push_back("VK_LAYER_LUNARG_standard_validation");
+	vulkanInstanceExtensions.push_back("VK_EXT_debug_report");
+	vulkanInstanceExtensions.push_back("VK_EXT_debug_utils");
 
 
 	SDL_Event ev;
@@ -54,9 +63,9 @@ int main(int argc, const char** argv)
 	}
 
 	SDL_DestroyWindow(window);
-	SDL_Vulkan_UnloadLibrary();
-	SDL_Quit();
 
+
+	graphics::VulkanContext::uninitialize();
 
 	return EXIT_SUCCESS;
 }
