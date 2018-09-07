@@ -16,7 +16,10 @@ int main(int argc, const char** argv)
 	glm::mat4 matrix(1.0);
 	std::cout << glm::to_string(matrix) << "\n";
 
-	graphics::VulkanContext::initialize();
+	if (!graphics::VulkanContext::initialize())
+	{
+		return EXIT_FAILURE;
+	}
 
 	auto window = graphics::VulkanContext::createWindow("test", 800, 600);
 	auto instance = graphics::VulkanContext::createVulkanInstance(window, true);
@@ -40,7 +43,6 @@ int main(int argc, const char** argv)
 	}
 
 	instance.destroySurfaceKHR(surface);
-	graphics::VulkanContext::destoryDebugCallback(instance, debug);
 	instance.destroy();
 	window = nullptr;
 
