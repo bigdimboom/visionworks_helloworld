@@ -8,6 +8,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "src/engine/graphics/vulkan_context.h"
+#include "src/engine/graphics/vulkan_window.h"
 
 
 int main(int argc, const char** argv)
@@ -17,36 +18,9 @@ int main(int argc, const char** argv)
 
 	graphics::VulkanContext::initialize();
 
-	auto window = SDL_CreateWindow(
-		"test",
-		SDL_WINDOWPOS_CENTERED,
-		SDL_WINDOWPOS_CENTERED,
-		800, 600,
-		SDL_WINDOW_VULKAN
-	);
-
-	if (!window)
-	{
-		SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "sdl window create error.\n");
-		return EXIT_FAILURE;
-	}
-
-	auto instanceExtensionProp = vk::enumerateInstanceExtensionProperties();
-	auto instanceLayerProp = vk::enumerateInstanceLayerProperties();
-	auto instanceVersion = vk::enumerateInstanceVersion();
-
-	unsigned extensionCount = 0;
-	std::vector<const char*> vulkanInstanceExtensions;
-	SDL_Vulkan_GetInstanceExtensions(window, &extensionCount, nullptr);
-	vulkanInstanceExtensions.resize(extensionCount);
-	SDL_Vulkan_GetInstanceExtensions(window, &extensionCount, vulkanInstanceExtensions.data());
-
-	std::vector<const char*> vulkanInstanceLayers;
-
-	vulkanInstanceLayers.push_back("VK_LAYER_LUNARG_standard_validation");
-	vulkanInstanceExtensions.push_back("VK_EXT_debug_report");
-	vulkanInstanceExtensions.push_back("VK_EXT_debug_utils");
-
+	auto window = graphics::VulkanContext::createWindow("test", 800, 600);
+	auto instance = graphics::VulkanContext::createVulkanInstance(window, true);
+	auto surface = graphics::VulkanContext::createVulkanSurface(window, instance);
 
 	SDL_Event ev;
 	bool isExit = false;
@@ -61,9 +35,6 @@ int main(int argc, const char** argv)
 			}
 		}
 	}
-
-	SDL_DestroyWindow(window);
-
 
 	graphics::VulkanContext::uninitialize();
 

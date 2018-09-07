@@ -1,10 +1,9 @@
 #pragma once
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_vulkan.h>
 #include <string>
 #include <memory>
 #include <vector>
-
+#include <SDL2/SDL.h>
+#include <vulkan/vulkan.hpp>
 
 namespace graphics
 {
@@ -24,6 +23,11 @@ public:
 	int height() const;
 	const std::string& title() const;
 	const std::vector<const char*>& requiredExtensions() const;
+	
+	float gamma() const;
+	void setGamma(float gamma);
+
+	vk::SurfaceKHR createVulkanSurface(const vk::Instance& vulkanInstance);
 
 private:
 	VulkanWindow(const VulkanWindow&) = delete;
