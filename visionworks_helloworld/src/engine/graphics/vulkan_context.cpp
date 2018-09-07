@@ -8,6 +8,22 @@
 namespace graphics
 {
 
+// HELPERS
+static VKAPI_ATTR VkBool32 VKAPI_CALL debug_report(VkDebugReportFlagsEXT flags,
+												   VkDebugReportObjectTypeEXT objectType,
+												   uint64_t object,
+												   size_t location,
+												   int32_t messageCode,
+												   const char* pLayerPrefix,
+												   const char* pMessage,
+												   void* pUserData)
+{
+	(void)flags; (void)object; (void)location; (void)messageCode; (void)pUserData; (void)pLayerPrefix; // Unused arguments
+	fprintf(stderr, "[vulkan] ObjectType: %i\nMessage: %s\n\n", objectType, pMessage);
+	return VK_FALSE;
+}
+
+// STATIC FUNCTIONS
 bool VulkanContext::initialize()
 {
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -54,6 +70,17 @@ const uint32_t & VulkanContext::EngineVersion()
 {
 	static auto version = 1u;
 	return version;
+}
+
+void VulkanContext::checkVulkanResult(vk::Result result)
+{
+	if (result == vk::Result::eSuccess)
+	{
+		return;
+	}
+	printf("VkResult %d\n", result);
+
+	throw std::runtime_error("vulkan error");
 }
 
 std::shared_ptr<VulkanWindow> VulkanContext::createWindow(const std::string & title, int width, int height, bool fullScreen, float gamma)
@@ -128,7 +155,7 @@ vk::Instance VulkanContext::createVulkanInstance(std::shared_ptr<VulkanWindow> w
 	{
 		vulkanInstanceLayers.push_back("VK_LAYER_LUNARG_standard_validation");
 		vulkanInstanceExtensions.push_back("VK_EXT_debug_report");
-		vulkanInstanceExtensions.push_back("VK_EXT_debug_utils");
+		//vulkanInstanceExtensions.push_back("VK_EXT_debug_utils");
 	}
 
 	return createVulkanInstance(vulkanInstanceLayers, vulkanInstanceExtensions);
@@ -140,5 +167,44 @@ vk::SurfaceKHR VulkanContext::createVulkanSurface(std::shared_ptr<VulkanWindow> 
 	return window->createVulkanSurface(instance);
 }
 
+vk::DebugReportCallbackEXT VulkanContext::createDebugCallback(const vk::Instance & instance)
+{
+	assert(instance);
+
+	auto vkCreateDebugReportCallbackEXT =
+		(PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT");
+	assert(vkCreateDebugReportCallbackEXT != NULL);
+
+	VkDebugReportCallbackEXT handle;
+
+	// Setup the debug report callback
+	VkDebugReportCallbackCreateInfoEXT debug_report_ci = {};
+	debug_report_ci.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+	debug_report_ci.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT | VK_DEBUG_REPORT_PERFORMANCE_WARNING_BIT_EXT;
+	debug_report_ci.pfnCallback = debug_report;
+	debug_report_ci.pUserData = NULL;
+	auto err = vkCreateDebugReportCallbackEXT(instance, &debug_report_ci, nullptr, &handle);
+	checkVulkanResult((vk::Result)err);
+
+	return vk::DebugReportCallbackEXT(handle);
+}
+
+void VulkanContext::destoryDebugCallback(const vk::Instance & instance, vk::DebugReportCallbackEXT & debug)
+{
+	assert(instance && debug);
+
+	// Remove the debug report callback
+	auto vkDestroyDebugReportCallbackEXT =
+		(PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT");
+	vkDestroyDebugReportCallbackEXT(instance, debug, nullptr);
+
+	debug = nullptr;
+}
+
+const std::vector<vk::PhysicalDevice> VulkanContext::getPhysicalDeviceList(const vk::Instance & instance)
+{
+	assert(instance);
+	return instance.enumeratePhysicalDevices();
+}
 
 }// end namespace graphics

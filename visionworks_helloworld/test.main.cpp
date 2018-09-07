@@ -20,7 +20,10 @@ int main(int argc, const char** argv)
 
 	auto window = graphics::VulkanContext::createWindow("test", 800, 600);
 	auto instance = graphics::VulkanContext::createVulkanInstance(window, true);
+	auto debug = graphics::VulkanContext::createDebugCallback(instance);
 	auto surface = graphics::VulkanContext::createVulkanSurface(window, instance);
+	auto gpulist = graphics::VulkanContext::getPhysicalDeviceList(instance);
+
 
 	SDL_Event ev;
 	bool isExit = false;
@@ -35,6 +38,11 @@ int main(int argc, const char** argv)
 			}
 		}
 	}
+
+	instance.destroySurfaceKHR(surface);
+	graphics::VulkanContext::destoryDebugCallback(instance, debug);
+	instance.destroy();
+	window = nullptr;
 
 	graphics::VulkanContext::uninitialize();
 
