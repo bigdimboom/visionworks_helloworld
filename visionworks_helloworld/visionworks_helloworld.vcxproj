@@ -11,12 +11,27 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\engine\application\app_base.cpp" />
+    <ClCompile Include="src\engine\application\graphics_app.cpp" />
+    <ClCompile Include="src\engine\event\dispatcher.cpp" />
     <ClCompile Include="src\engine\graphics\vulkan_context.cpp" />
+    <ClCompile Include="src\engine\graphics\vulkan_device.cpp" />
+    <ClCompile Include="src\engine\graphics\vulkan_helper.cpp" />
+    <ClCompile Include="src\engine\graphics\vulkan_swapchain.cpp" />
     <ClCompile Include="src\engine\graphics\vulkan_window.cpp" />
-    <ClCompile Include="test.main.cpp" />
+    <ClCompile Include="src\test.main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\engine\application\app_base.h" />
+    <ClInclude Include="src\engine\application\graphics_app.h" />
+    <ClInclude Include="src\engine\event\dispatcher.h" />
+    <ClInclude Include="src\engine\event\event.h" />
+    <ClInclude Include="src\engine\event\safe_event.h" />
+    <ClInclude Include="src\engine\event\typed_map.h" />
     <ClInclude Include="src\engine\graphics\vulkan_context.h" />
+    <ClInclude Include="src\engine\graphics\vulkan_device.h" />
+    <ClInclude Include="src\engine\graphics\vulkan_helper.h" />
+    <ClInclude Include="src\engine\graphics\vulkan_swapchain.h" />
     <ClInclude Include="src\engine\graphics\vulkan_window.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

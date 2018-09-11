@@ -18,20 +18,67 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="test.main.cpp" />
-    <ClCompile Include="src\engine\graphics\vulkan_window.cpp">
-      <Filter>src\engine\graphics</Filter>
-    </ClCompile>
     <ClCompile Include="src\engine\graphics\vulkan_context.cpp">
       <Filter>src\engine\graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\graphics\vulkan_device.cpp">
+      <Filter>src\engine\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\graphics\vulkan_helper.cpp">
+      <Filter>src\engine\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\graphics\vulkan_swapchain.cpp">
+      <Filter>src\engine\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\graphics\vulkan_window.cpp">
+      <Filter>src\engine\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\event\dispatcher.cpp">
+      <Filter>src\engine\event</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\application\app_base.cpp">
+      <Filter>src\engine\application</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\application\graphics_app.cpp">
+      <Filter>src\engine\application</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test.main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\engine\graphics\vulkan_context.h">
+      <Filter>src\engine\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\graphics\vulkan_device.h">
+      <Filter>src\engine\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\graphics\vulkan_helper.h">
+      <Filter>src\engine\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\graphics\vulkan_swapchain.h">
+      <Filter>src\engine\graphics</Filter>
+    </ClInclude>
     <ClInclude Include="src\engine\graphics\vulkan_window.h">
       <Filter>src\engine\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\graphics\vulkan_context.h">
-      <Filter>src\engine\graphics</Filter>
+    <ClInclude Include="src\engine\event\dispatcher.h">
+      <Filter>src\engine\event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\event\event.h">
+      <Filter>src\engine\event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\event\safe_event.h">
+      <Filter>src\engine\event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\event\typed_map.h">
+      <Filter>src\engine\event</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\application\app_base.h">
+      <Filter>src\engine\application</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\application\graphics_app.h">
+      <Filter>src\engine\application</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

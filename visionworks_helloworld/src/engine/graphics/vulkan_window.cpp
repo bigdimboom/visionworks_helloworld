@@ -1,77 +1,85 @@
 #include "vulkan_window.h"
 #include <assert.h>
-#include <iostream>
-#include <SDL2/SDL_vulkan.h>
 
 namespace graphics
 {
 
-// HELPERS
 VulkanWindow::VulkanWindow()
 {
 }
 
-// MEMBER FUNCTIONS
 VulkanWindow::~VulkanWindow()
 {
-	if (d_window)
-	{
-		SDL_DestroyWindow(d_window);
-		d_window = nullptr;
-	}
+	destory();
 }
 
-std::shared_ptr<VulkanWindow> VulkanWindow::create(const std::string & title, int width, int height, bool fullScreen, float gamma)
+std::shared_ptr<VulkanWindow> VulkanWindow::create(const char * title, int width, int height, bool enableFullScreen, float gamma)
 {
-	std::shared_ptr<VulkanWindow> window(new VulkanWindow());
-	window->d_width = width;
-	window->d_height = height;
-	window->d_isFullScreen = fullScreen;
-	window->d_title = title;
+	auto data = /*std::make_shared<Window>();*/ std::shared_ptr<VulkanWindow>(new VulkanWindow());
 
-	int creationFlags = SDL_WINDOW_VULKAN;
+	SDL_DisplayMode current;
+	SDL_GetCurrentDisplayMode(0, &current);
 
-	if (fullScreen)
+	int flags = SDL_WINDOW_VULKAN /*| SDL_WINDOW_RESIZABLE*/; // no resizing for now
+
+	if (enableFullScreen)
 	{
-		creationFlags |= SDL_WINDOW_FULLSCREEN;
-		//creationFlags |= SDL_WINDOW_SHOWN;
+		flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 	}
 
-	window->d_window = SDL_CreateWindow(window->d_title.c_str(),
-										SDL_WINDOWPOS_CENTERED,
-										SDL_WINDOWPOS_CENTERED,
-										window->d_width,
-										window->d_height,
-										creationFlags);
+	data->d_isFullScreen = enableFullScreen;
+	data->d_width = width;
+	data->d_height = height;
+	data->d_title = title;
+	data->d_windowGamma = gamma;
 
-	if (!window->d_window)
+	data->d_window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED , SDL_WINDOWPOS_CENTERED, width, height, flags);
+	
+	if (!data->d_window)
 	{
-		SDL_LogError(SDL_LOG_CATEGORY_VIDEO, "sdl window create error.\n");
+		throw std::runtime_error("unable to create window");
 		return nullptr;
 	}
 
-	unsigned count = 0;
-	SDL_Vulkan_GetInstanceExtensions(window->d_window, &count, nullptr);
-	window->d_requiredExtensions.resize(count);
-	SDL_Vulkan_GetInstanceExtensions(window->d_window, &count, window->d_requiredExtensions.data());
+	data->setBrightness(gamma);
 
-	return window;
+	if (enableFullScreen)
+	{
+		SDL_GetWindowSize(data->d_window, &width, &height);
+	}
+
+	unsigned extensions_count = 0;
+	SDL_Vulkan_GetInstanceExtensions(data->d_window, &extensions_count, nullptr);
+	data->d_vulkanInstanceExtensions.resize(extensions_count);
+	SDL_Vulkan_GetInstanceExtensions(data->d_window, &extensions_count, data->d_vulkanInstanceExtensions.data());
+
+	return data;
 }
 
-void VulkanWindow::setFullScreen(bool enabled)
+void VulkanWindow::setBrightness(float gamma)
 {
 	assert(d_window);
-	d_isFullScreen = enabled;
-
-	if (d_isFullScreen)
+	if (SDL_SetWindowBrightness(d_window, gamma) != 0)
 	{
-		SDL_SetWindowFullscreen(d_window, SDL_WINDOW_FULLSCREEN);
+		throw std::runtime_error("Unable set gamma");
 	}
-	else
-	{
-		SDL_SetWindowFullscreen(d_window, 0);
-	}
+	d_windowGamma = gamma;
+}
 
+float VulkanWindow::brightness() const
+{
+	assert(d_window);
+	return d_windowGamma;
+}
+
+void VulkanWindow::setFullScreen(bool isFullScreen)
+{
+	assert(d_window);
+	d_isFullScreen = isFullScreen;
+	if (SDL_SetWindowFullscreen(d_window, SDL_WINDOW_FULLSCREEN) != 0)
+	{
+		throw std::runtime_error("full screen error");
+	}
 	SDL_GetWindowSize(d_window, &d_width, &d_height);
 }
 
@@ -80,6 +88,7 @@ bool VulkanWindow::isFullScreen() const
 	assert(d_window);
 	return d_isFullScreen;
 }
+
 
 int VulkanWindow::width() const
 {
@@ -99,22 +108,22 @@ const std::string & VulkanWindow::title() const
 	return d_title;
 }
 
-const std::vector<const char*>& VulkanWindow::requiredExtensions() const
+const std::string & VulkanWindow::surfaceColor() const
 {
 	assert(d_window);
-	return d_requiredExtensions;
+	return d_surfaceColor;
 }
 
-float VulkanWindow::gamma() const
+const std::string & VulkanWindow::surfaceFormat() const
 {
 	assert(d_window);
-	return SDL_GetWindowBrightness(d_window);
+	return d_surfaceFormat;
 }
 
-void VulkanWindow::setGamma(float gamma)
+const std::vector<const char*>& VulkanWindow::requiredVkInstanceExtensions() const
 {
 	assert(d_window);
-	SDL_SetWindowBrightness(d_window, gamma);
+	return d_vulkanInstanceExtensions;
 }
 
 vk::SurfaceKHR VulkanWindow::createVulkanSurface(const vk::Instance & vulkanInstance)
@@ -129,4 +138,12 @@ vk::SurfaceKHR VulkanWindow::createVulkanSurface(const vk::Instance & vulkanInst
 	return surface;
 }
 
+void VulkanWindow::destory()
+{
+	if (d_window)
+	{
+		SDL_DestroyWindow(d_window);
+	}
 }
+
+} // end namespace graphics
