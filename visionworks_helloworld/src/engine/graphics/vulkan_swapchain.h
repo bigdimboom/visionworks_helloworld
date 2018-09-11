@@ -21,7 +21,7 @@ struct SwapChainBuffers
 
 struct SwapChainSupport
 {
-	std::vector<vk::SurfaceFormatKHR> formats;
+	std::vector<vk::SurfaceFormatKHR> surfaceFormats;
 	std::vector<vk::PresentModeKHR> presentModes;
 	vk::SurfaceCapabilitiesKHR capabilities;
 };

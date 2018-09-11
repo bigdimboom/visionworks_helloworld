@@ -10,8 +10,15 @@ SwapChainSupport VulkanSwapChain::querySwapChainSupport(vk::PhysicalDevice physi
 
 	SwapChainSupport swapChainSupport;
 	swapChainSupport.capabilities = physicalDevice.getSurfaceCapabilitiesKHR(surface);
-	swapChainSupport.formats = physicalDevice.getSurfaceFormatsKHR(surface);
+	swapChainSupport.surfaceFormats = physicalDevice.getSurfaceFormatsKHR(surface);
 	swapChainSupport.presentModes = physicalDevice.getSurfacePresentModesKHR(surface);
+
+	auto queueFamiliesProp = physicalDevice.getQueueFamilyProperties();
+	for (int i = 0; i < (int)queueFamiliesProp.size(); ++i)
+	{
+		auto present = physicalDevice.getSurfaceSupportKHR(i, surface);
+	}
+
 
 	return swapChainSupport;
 }

@@ -2,6 +2,7 @@
 #include <vulkan/vulkan.hpp>
 #include "vulkan_window.h"
 #include "vulkan_device.h"
+#include "vulkan_swapchain.h"
 
 namespace graphics
 {
@@ -24,6 +25,8 @@ public:
 	vk::SurfaceKHR surface;
 	/** @brief vulkan deivce from software view**/
 	std::shared_ptr<VulkanDevice> device;
+	/* @brief vulkan swapchain*/
+	std::shared_ptr<VulkanSwapChain> swapChain;
 
 	/****************************************************************************************************************************************************/
 	// Member Functions

@@ -63,6 +63,13 @@ std::shared_ptr<VulkanContext> VulkanContext::create(std::shared_ptr<VulkanWindo
 	}
 
 	context->device = VulkanDevice::create(GPUList[physicalDeviceID], queueTypes);
+
+	auto sss = VulkanSwapChain::querySwapChainSupport(GPUList[physicalDeviceID], context->surface);
+	//context->swapChain = std::shared_ptr<VulkanSwapChain>(new VulkanSwapChain());
+
+
+
+
 	return context;
 }
 
