@@ -10,13 +10,6 @@
 #define WINDOW_DEFAULT_HEIGHT 600
 #define WINDOW_DEFAULT_TITLE "debug"
 
-#define SURFACE_FORMAT_B8G8R8A8_UNORM "B8G8R8A8_UNORM"
-#define SURFACE_FORMAT_R8G8B8A8_UNORM "R8G8B8A8_UNORM"
-#define SURFACE_FORMAT_B8G8R8_UNORM "B8G8R8_UNORM"
-#define SURFACE_FORMAT_R8G8B8_UNORM "R8G8B8_UNORM"
-
-#define SURFACE_COLOR_SPACE "SRGB_NONLINEAR"
-
 namespace graphics
 {
 
@@ -38,8 +31,6 @@ public:
 	int height() const;
 
 	const std::string& title() const;
-	const std::string& surfaceColor() const;
-	const std::string& surfaceFormat() const;
 	const std::vector<const char*>& requiredVkInstanceExtensions() const;
 
 	vk::SurfaceKHR createVulkanSurface(const vk::Instance& vulkanInstance);
@@ -61,12 +52,6 @@ private:
 	float d_windowGamma = 1.0f;
 	std::string d_title = "Debug";
 	std::vector<const char*> d_vulkanInstanceExtensions;
-
-	std::string d_surfaceColor = SURFACE_COLOR_SPACE;
-	std::string d_surfaceFormat = SURFACE_FORMAT_B8G8R8A8_UNORM;
-
-	//vk::Instance d_instance = nullptr;
-	//vk::SurfaceKHR d_surface = nullptr;
 };
 
 
