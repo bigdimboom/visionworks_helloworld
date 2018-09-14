@@ -26,6 +26,9 @@ public:
 	vk::ImageUsageFlags imageUsage;
 	vk::Sampler sampler;
 
+	vk::ComponentMapping componentMapping;
+	vk::ImageSubresourceRange imageSubresourceRange;
+
 	vk::DeviceSize size;
 	vk::DeviceSize alignment;
 
@@ -39,9 +42,12 @@ public:
 		vk::ImageType imageType,
 		uint32_t mipLevels,
 		uint32_t imageLayers,
+		vk::MemoryPropertyFlags memoryPropertyFlags,
+		vk::ComponentMapping componentMapping,
+		vk::ImageSubresourceRange imageSubresourceRange,
 		vk::ImageTiling tiling = vk::ImageTiling::eOptimal,
 		vk::SampleCountFlagBits samplecount = vk::SampleCountFlagBits::e1,
-		vk::ImageCreateFlags flags = {}
+		vk::ImageCreateFlags ciflags = {}
 	);
 
 

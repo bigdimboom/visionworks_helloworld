@@ -49,10 +49,13 @@ std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevic
 													 vk::ImageUsageFlags usage, 
 													 vk::ImageType imageType,
 													 uint32_t mipLevels, 
-													 uint32_t layers,
+													 uint32_t imageLayers,
+													 vk::MemoryPropertyFlags memoryPropertyFlags,
+													 vk::ComponentMapping componentMapping,
+													 vk::ImageSubresourceRange imageSubresourceRange,
 													 vk::ImageTiling tiling, 
 													 vk::SampleCountFlagBits samplecount, 
-													 vk::ImageCreateFlags flags)
+													 vk::ImageCreateFlags ciflags)
 {
 	assert(device);
 	auto texture = std::shared_ptr<VulkanTexture>(new VulkanTexture());
@@ -61,12 +64,12 @@ std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevic
 	texture->logicalDevice = device->logicalDevice;
 
 	vk::ImageCreateInfo ci(
-		flags,
+		ciflags,
 		imageType,
 		format,
 		resolution,
 		mipLevels,
-		layers,
+		imageLayers,
 		samplecount,
 		tiling,
 		usage,
@@ -77,12 +80,13 @@ std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevic
 	texture->image = texture->logicalDevice.createImage(ci);
 	texture->imageUsage = usage;
 	texture->format = format;
-	texture->layerCount = layers;
+	texture->layerCount = imageLayers;
 	texture->mipLevels = mipLevels;
 
 	// TODO:
-
-
+	vk::ImageViewCreateInfo imageViewCi;
+	imageViewCi.setFormat(texture->format);
+	
 
 
 	return texture;
