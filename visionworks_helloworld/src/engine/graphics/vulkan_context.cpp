@@ -16,6 +16,9 @@ VulkanContext::~VulkanContext()
 	if (instance)
 	{
 		// TODO:
+		defaultRenderPass = nullptr;
+		depthResource = nullptr;
+		swapChain = nullptr;
 		device = nullptr;
 		instance.destroySurfaceKHR(surface);
 		destoryDebugCallback(instance, debugMsgCallback);
@@ -64,11 +67,13 @@ std::shared_ptr<VulkanContext> VulkanContext::create(std::shared_ptr<VulkanWindo
 
 	context->device = VulkanDevice::create(GPUList[physicalDeviceID], queueTypes);
 
-	auto sss = VulkanSwapChain::querySwapChainSupport(GPUList[physicalDeviceID], context->surface);
-	//context->swapChain = std::shared_ptr<VulkanSwapChain>(new VulkanSwapChain());
+	vk::Extent2D extent(window->width(), window->height());
+	context->swapChain = VulkanSwapChain::create(GPUList[physicalDeviceID], vk::Device(*context->device), context->surface, extent, 
+												 context->device->getQueueFamilyIndex(vk::QueueFlagBits::eGraphics));
 
+	context->depthResource = VulkanDepthResource::create(extent, GPUList[physicalDeviceID], context->device->logicalDevice);
 
-
+	context->defaultRenderPass = VulkanRenderPass::create(context->swapChain, context->depthResource);
 
 	return context;
 }

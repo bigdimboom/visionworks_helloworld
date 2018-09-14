@@ -34,6 +34,14 @@ public:
 	/**create command pool**/
 	static vk::CommandPool createCommandPool(const vk::Device& logicalDevice, uint32_t queueFamilyIndex, vk::CommandPoolCreateFlags createFlags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
 
+	/**test if the format is a depth format**/
+	static bool isDepthFormat(const vk::Format& format);
+
+	/**test if the format is a stencil format**/
+	static bool isStencilFormat(const vk::Format& format);
+
+
+
 	/*load shader module*/
 	static vk::ShaderModule loadShaderSPIRV(const char *fileName, const vk::Device& device);
 	static vk::ShaderModule loadShaderGLSL(const char *fileName, const vk::Device& device, vk::ShaderStageFlagBits stage);

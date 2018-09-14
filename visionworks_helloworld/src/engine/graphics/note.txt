@@ -1,0 +1,9 @@
+Vulkan Pipeline Creation steps
+1. query instance level extensions and layers from Vulkan System. (Debug callback is et up at here)
+2. create vulkan instance with the extensions and layers you need
+3. query GPUs from instance and select a good GPU(VkPhyscialDevice) based on the familyQueues it has in the physicalDeviceProperties
+4. create a logical device from selected GPU
+5. create the swapchain from logical device
+6. create renderpass from logical device
+7. create depth and stencil resource from logical device
+8. create frame buffer with "swap chain", "renderpass" and "depth resource"

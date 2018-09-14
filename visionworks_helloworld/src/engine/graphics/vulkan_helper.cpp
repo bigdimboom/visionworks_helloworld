@@ -227,6 +227,34 @@ vk::CommandPool VulkanHelper::createCommandPool(const vk::Device & logicalDevice
 	return logicalDevice.createCommandPool(cmdpoolInfo);
 }
 
+bool VulkanHelper::isDepthFormat(const vk::Format & format)
+{
+	static std::vector<vk::Format> formats =
+	{
+		vk::Format::eD16Unorm,
+		vk::Format::eX8D24UnormPack32,
+		vk::Format::eD32Sfloat,
+		vk::Format::eD16UnormS8Uint,
+		vk::Format::eD24UnormS8Uint,
+		vk::Format::eD32SfloatS8Uint
+	};
+
+	return std::find(formats.begin(), formats.end(), format) != std::end(formats);
+}
+
+bool VulkanHelper::isStencilFormat(const vk::Format & format)
+{
+	static std::vector<vk::Format> formats =
+	{
+		vk::Format::eS8Uint,
+		vk::Format::eD16UnormS8Uint,
+		vk::Format::eD24UnormS8Uint,
+		vk::Format::eD32SfloatS8Uint
+	};
+
+	return std::find(formats.begin(), formats.end(), format) != std::end(formats);
+}
+
 vk::ShaderModule VulkanHelper::loadShaderSPIRV(const char * fileName, const vk::Device & device)
 {
 	if (!std::experimental::filesystem::exists(fileName))

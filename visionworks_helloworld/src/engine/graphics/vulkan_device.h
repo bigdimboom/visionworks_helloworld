@@ -54,6 +54,9 @@ public:
 	/*get family queue index*/
 	uint32_t getQueueFamilyIndex(vk::QueueFlagBits queueFlags);
 
+	/*get a vulkan queue*/
+	vk::Queue queue(uint32_t familyQueueIndex);
+
 	/*commadn pool creation*/
 	vk::CommandPool createCmdPool(uint32_t queueFamilyIndex, vk::CommandPoolCreateFlags createFlags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
 

@@ -163,6 +163,7 @@ VulkanDevice::~VulkanDevice()
 {
 	if (logicalDevice)
 	{
+		logicalDevice.destroyCommandPool(graphicsCmdPool);
 		logicalDevice.destroy();
 		logicalDevice = nullptr;
 	}
@@ -190,6 +191,16 @@ uint32_t VulkanDevice::getQueueFamilyIndex(vk::QueueFlagBits queueFlags)
 		assert(1 != 1 && "unsupported type");
 	}
 	return 0;
+}
+
+vk::Queue VulkanDevice::queue(uint32_t familyQueueIndex)
+{
+	assert(physicalDevice && logicalDevice);
+	assert(familyQueueIndex == queueFamilyIndices.compute ||
+		   familyQueueIndex == queueFamilyIndices.graphics ||
+		   familyQueueIndex == queueFamilyIndices.transfer);
+
+	return logicalDevice.getQueue(familyQueueIndex, 0);
 }
 
 vk::CommandPool VulkanDevice::createCmdPool(uint32_t queueFamilyIndex, vk::CommandPoolCreateFlags createFlags)

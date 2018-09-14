@@ -1,48 +1,59 @@
 #pragma once
 #include <vulkan/vulkan.hpp>
-#include <vector>
-
-#define SURFACE_FORMAT_B8G8R8A8_UNORM "B8G8R8A8_UNORM"
-#define SURFACE_FORMAT_R8G8B8A8_UNORM "R8G8B8A8_UNORM"
-#define SURFACE_FORMAT_B8G8R8_UNORM "B8G8R8_UNORM"
-#define SURFACE_FORMAT_R8G8B8_UNORM "R8G8B8_UNORM"
-
-#define SURFACE_COLOR_SPACE "SRGB_NONLINEAR"
 
 namespace graphics
 {
 
-struct SwapChainBuffers
-{
-	vk::Image image;
-	vk::ImageView view;
-	vk::Framebuffer frameBuffer;
-};
-
-struct SwapChainSupport
-{
-	std::vector<vk::SurfaceFormatKHR> surfaceFormats;
-	std::vector<vk::PresentModeKHR> presentModes;
-	vk::SurfaceCapabilitiesKHR capabilities;
-};
-
 class VulkanSwapChain
 {
 public:
-	vk::Format colorFormat;
-	vk::ColorSpaceKHR colorSpace;
+	~VulkanSwapChain();
+
+	struct SwapChainBuffers
+	{
+		vk::Image image;
+		vk::ImageView imageView;
+		vk::ImageSubresourceRange imageSubresourceRange;
+	};
+
+	vk::Format colorFormat = vk::Format::eB8G8R8A8Unorm;
+	vk::ColorSpaceKHR colorSpace = vk::ColorSpaceKHR::eSrgbNonlinear;
+
+	int frameCount = 0;
+	int frameLayers = 1;
+
+	uint32_t presentQueueIndex = UINT32_MAX;
 
 	vk::Extent2D actualExtent;
 	vk::PresentModeKHR presentMode;
 	vk::SurfaceFormatKHR surfaceFormat;
-	std::vector<SwapChainBuffers> buffers;
 
-	uint32_t queueGraphicsIndex = 0;
+	vk::Device logicalDevice = nullptr;
+	std::vector<SwapChainBuffers> buffers;
 	vk::SwapchainKHR swapChain = nullptr;
 
-	static SwapChainSupport querySwapChainSupport(vk::PhysicalDevice physicalDevice, vk::SurfaceKHR surface);
-	static vk::SurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR>& availableFormats);
+	// CREATE FUNCTIONS
+	static std::shared_ptr<VulkanSwapChain> create(const vk::PhysicalDevice & physicalDevice,
+												   const vk::Device logicalDevice,
+												   const vk::SurfaceKHR & surface,
+												   const vk::Extent2D& resolution,
+												   uint32_t graphicsQueueIndex,
+												   vk::Format format = vk::Format::eB8G8R8A8Unorm,
+												   vk::ColorSpaceKHR color = vk::ColorSpaceKHR::eSrgbNonlinear,
+												   vk::SwapchainKHR oldSwapChain = nullptr,
+												   int frameCount = 3, int imageArrayLayers = 1);
 
+	// MEMBER FUNCTIONS
+	uint32_t acquireNewFrame(vk::Semaphore sema);
+	void queuePresent(vk::Queue queue, uint32_t imageIndex, vk::Semaphore waitSemaphore = nullptr);
+
+private:
+	VulkanSwapChain(const VulkanSwapChain&) = delete;
+	VulkanSwapChain(VulkanSwapChain&&) = delete;
+	void operator=(const VulkanSwapChain&) = delete;
+	void operator=(VulkanSwapChain&&) = delete;
+
+	VulkanSwapChain() {};
 
 
 };

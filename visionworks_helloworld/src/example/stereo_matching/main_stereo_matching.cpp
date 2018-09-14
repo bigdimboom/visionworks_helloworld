@@ -200,9 +200,12 @@ int main(int argc, char* argv[])
         // Parse command line arguments
         //
 
-        std::string sourceUri  = app.findSampleFilePath("left_right.mp4");
+        //std::string sourceUri  = app.findSampleFilePath("./data/left_right.mp4");
+        //std::string configFile = app.findSampleFilePath("./data/stereo_matching_demo_config.ini");
 
-        std::string configFile = app.findSampleFilePath("stereo_matching_demo_config.ini");
+		std::string sourceUri = "./data/left_right.mp4";
+		std::string configFile = "./data/stereo_matching_demo_config.ini";
+
         StereoMatching::StereoMatchingParams params;
         StereoMatching::ImplementationType implementationType = StereoMatching::HIGH_LEVEL_API;
 

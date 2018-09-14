@@ -45,6 +45,18 @@
     <ClCompile Include="src\test.main.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\graphics\vulkan_buffer.cpp">
+      <Filter>src\engine\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\graphics\vulkan_depth_resource.cpp">
+      <Filter>src\engine\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\graphics\vulkan_frame_buffer.cpp">
+      <Filter>src\engine\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\graphics\vulkan_render_pass.cpp">
+      <Filter>src\engine\graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\engine\graphics\vulkan_context.h">
@@ -79,6 +91,18 @@
     </ClInclude>
     <ClInclude Include="src\engine\application\graphics_app.h">
       <Filter>src\engine\application</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\graphics\vulkan_buffer.h">
+      <Filter>src\engine\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\graphics\vulkan_depth_resource.h">
+      <Filter>src\engine\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\graphics\vulkan_frame_buffer.h">
+      <Filter>src\engine\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\graphics\vulkan_render_pass.h">
+      <Filter>src\engine\graphics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

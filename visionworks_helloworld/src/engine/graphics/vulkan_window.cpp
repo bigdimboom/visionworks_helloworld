@@ -108,6 +108,18 @@ const std::string & VulkanWindow::title() const
 	return d_title;
 }
 
+//const std::string & VulkanWindow::surfaceColor() const
+//{
+//	assert(d_window);
+//	return d_surfaceColor;
+//}
+//
+//const std::string & VulkanWindow::surfaceFormat() const
+//{
+//	assert(d_window);
+//	return d_surfaceFormat;
+//}
+
 const std::vector<const char*>& VulkanWindow::requiredVkInstanceExtensions() const
 {
 	assert(d_window);

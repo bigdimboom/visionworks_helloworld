@@ -3,6 +3,8 @@
 #include "vulkan_window.h"
 #include "vulkan_device.h"
 #include "vulkan_swapchain.h"
+#include "vulkan_depth_resource.h"
+#include "vulkan_render_pass.h"
 
 namespace graphics
 {
@@ -27,6 +29,12 @@ public:
 	std::shared_ptr<VulkanDevice> device;
 	/* @brief vulkan swapchain*/
 	std::shared_ptr<VulkanSwapChain> swapChain;
+	/** @brief depth**/
+	std::shared_ptr<VulkanDepthResource> depthResource;
+	/** @brief render pass**/
+	std::shared_ptr<VulkanRenderPass> defaultRenderPass;
+
+
 
 	/****************************************************************************************************************************************************/
 	// Member Functions
@@ -65,7 +73,6 @@ public:
 
 	/*return the best family queue index assignment on this GPU*/
 	static uint32_t getOptimalFamilyQueueIndex(const vk::PhysicalDevice& phsicalDevice, vk::QueueFlagBits queueFlags);
-
 
 private:
 	VulkanContext() {}
