@@ -57,6 +57,9 @@
     <ClCompile Include="src\engine\graphics\vulkan_render_pass.cpp">
       <Filter>src\engine\graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\graphics\vulkan_texture.cpp">
+      <Filter>src\engine\graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\engine\graphics\vulkan_context.h">
@@ -102,6 +105,9 @@
       <Filter>src\engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\graphics\vulkan_render_pass.h">
+      <Filter>src\engine\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\graphics\vulkan_texture.h">
       <Filter>src\engine\graphics</Filter>
     </ClInclude>
   </ItemGroup>
