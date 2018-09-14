@@ -5,6 +5,7 @@
 #include "vulkan_swapchain.h"
 #include "vulkan_depth_resource.h"
 #include "vulkan_render_pass.h"
+#include "vulkan_frame_buffer.h"
 
 namespace graphics
 {
@@ -33,7 +34,8 @@ public:
 	std::shared_ptr<VulkanDepthResource> depthResource;
 	/** @brief render pass**/
 	std::shared_ptr<VulkanRenderPass> defaultRenderPass;
-
+	/** @brief frame buffer**/
+	std::shared_ptr<VulkanFrameBuffer> frameBuffer;
 
 
 	/****************************************************************************************************************************************************/

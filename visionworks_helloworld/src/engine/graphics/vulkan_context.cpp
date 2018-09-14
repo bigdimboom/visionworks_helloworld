@@ -16,6 +16,7 @@ VulkanContext::~VulkanContext()
 	if (instance)
 	{
 		// TODO:
+		frameBuffer = nullptr;
 		defaultRenderPass = nullptr;
 		depthResource = nullptr;
 		swapChain = nullptr;
@@ -74,6 +75,8 @@ std::shared_ptr<VulkanContext> VulkanContext::create(std::shared_ptr<VulkanWindo
 	context->depthResource = VulkanDepthResource::create(extent, GPUList[physicalDeviceID], context->device->logicalDevice);
 
 	context->defaultRenderPass = VulkanRenderPass::create(context->swapChain, context->depthResource);
+
+	context->frameBuffer = VulkanFrameBuffer::create(context->swapChain, context->depthResource, context->defaultRenderPass);
 
 	return context;
 }
