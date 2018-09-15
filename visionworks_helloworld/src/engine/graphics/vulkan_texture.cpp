@@ -117,6 +117,8 @@ std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevic
 	texture->alignment = memreq.alignment;
 	texture->size = memreq.size;
 
+	texture->bind(0);
+
 	return texture;
 }
 
