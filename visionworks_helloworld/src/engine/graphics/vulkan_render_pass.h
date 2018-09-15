@@ -1,10 +1,35 @@
 #pragma once
 #include <vulkan/vulkan.hpp>
-#include "vulkan_swapchain.h"
-#include "vulkan_depth_resource.h"
+
 
 namespace graphics
 {
+
+struct FramebufferAttachment
+{
+	vk::Image image;
+	vk::DeviceMemory memory;
+	vk::ImageView view;
+	vk::Format format;
+	vk::ImageSubresourceRange subresourceRange;
+	vk::AttachmentDescription description;
+
+	/**
+	* @brief Returns true if the attachment has a depth component
+	*/
+	bool hasDepth() const;
+	/**
+	* @brief Returns true if the attachment has a stencil component
+	*/
+	bool hasStencil() const;
+	/**
+	* @brief Returns true if the attachment is a depth and/or stencil attachment
+	*/
+	bool isDepthStencil() const;
+};
+
+class VulkanSwapChain;
+class VulkanDepthResource;
 
 class VulkanRenderPass
 {
@@ -17,6 +42,7 @@ public:
 	std::vector<vk::AttachmentDescription> attachments;
 	std::vector<vk::SubpassDescription> subpasses;
 	std::vector<vk::SubpassDependency> denpendencies;
+	vk::Framebuffer frameBuffer;
 
 	static std::shared_ptr<VulkanRenderPass> create(
 		std::shared_ptr<VulkanSwapChain> swapChain,

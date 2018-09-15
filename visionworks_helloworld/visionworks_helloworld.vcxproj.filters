@@ -51,9 +51,6 @@
     <ClCompile Include="src\engine\graphics\vulkan_depth_resource.cpp">
       <Filter>src\engine\graphics</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\graphics\vulkan_frame_buffer.cpp">
-      <Filter>src\engine\graphics</Filter>
-    </ClCompile>
     <ClCompile Include="src\engine\graphics\vulkan_render_pass.cpp">
       <Filter>src\engine\graphics</Filter>
     </ClCompile>
@@ -99,9 +96,6 @@
       <Filter>src\engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\graphics\vulkan_depth_resource.h">
-      <Filter>src\engine\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\engine\graphics\vulkan_frame_buffer.h">
       <Filter>src\engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\graphics\vulkan_render_pass.h">

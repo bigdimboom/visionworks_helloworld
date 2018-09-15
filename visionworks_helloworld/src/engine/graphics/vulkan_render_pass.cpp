@@ -1,7 +1,25 @@
 #include "vulkan_render_pass.h"
+#include "vulkan_swapchain.h"
+#include "vulkan_depth_resource.h"
+#include "vulkan_helper.h"
 
 namespace graphics
 {
+
+bool FramebufferAttachment::hasDepth() const
+{
+	return VulkanHelper::isDepthFormat(this->format);
+}
+
+bool FramebufferAttachment::hasStencil() const
+{
+	return VulkanHelper::isStencilFormat(this->format);
+}
+
+bool FramebufferAttachment::isDepthStencil() const
+{
+	return hasDepth() || hasStencil();
+}
 
 VulkanRenderPass::~VulkanRenderPass()
 {
@@ -10,6 +28,13 @@ VulkanRenderPass::~VulkanRenderPass()
 		assert(logicalDevice);
 		logicalDevice.destroyRenderPass(renderpass);
 		renderpass = nullptr;
+	}
+
+	if (frameBuffer)
+	{
+		assert(logicalDevice);
+		logicalDevice.destroyFramebuffer(frameBuffer);
+		frameBuffer = nullptr;
 	}
 }
 
@@ -53,15 +78,23 @@ std::shared_ptr<VulkanRenderPass> VulkanRenderPass::create(std::shared_ptr<Vulka
 	attachments[AttachmentKey::DEPTH].setInitialLayout(vk::ImageLayout::eUndefined);
 	attachments[AttachmentKey::DEPTH].setFinalLayout(vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
-	rpData->attachments.push_back(attachments[AttachmentKey::COLOR]);
-	rpData->attachments.push_back(attachments[AttachmentKey::DEPTH]);
 
 	vk::SubpassDescription subpass;
-	vk::AttachmentReference colorRef(0, vk::ImageLayout::eColorAttachmentOptimal);
-	vk::AttachmentReference depthRef(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
+	std::vector<vk::AttachmentReference> colorRef;
+
+	int i = 0;
+	for (; i < swapChain->frameCount; ++i)
+	{
+		rpData->attachments.push_back(attachments[AttachmentKey::COLOR]);
+		colorRef.push_back(vk::AttachmentReference(i, vk::ImageLayout::eColorAttachmentOptimal));
+	}
+
+	vk::AttachmentReference depthRef(i, vk::ImageLayout::eDepthStencilAttachmentOptimal);
+	rpData->attachments.push_back(attachments[AttachmentKey::DEPTH]);
+
 	subpass.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics);
-	subpass.setColorAttachmentCount(1);
-	subpass.setPColorAttachments(&colorRef);
+	subpass.setColorAttachmentCount((uint32_t)colorRef.size());
+	subpass.setPColorAttachments(colorRef.data());
 	subpass.setPDepthStencilAttachment(&depthRef);
 	subpass.setInputAttachmentCount(0);
 	subpass.setPInputAttachments(nullptr);
@@ -71,6 +104,7 @@ std::shared_ptr<VulkanRenderPass> VulkanRenderPass::create(std::shared_ptr<Vulka
 
 	rpData->subpasses.push_back(subpass);
 
+	// TODO: it might be bug here.
 	// Subpass dependencies for layout transitions
 	std::array<vk::SubpassDependency, 2> dependencies;
 	dependencies[0].setSrcSubpass(VK_SUBPASS_EXTERNAL);
@@ -100,7 +134,41 @@ std::shared_ptr<VulkanRenderPass> VulkanRenderPass::create(std::shared_ptr<Vulka
 											(uint32_t)rpData->denpendencies.size(),
 											rpData->denpendencies.data());
 
+	// render opass
 	rpData->renderpass = rpData->logicalDevice.createRenderPass(renderPassInfo);
+	assert(rpData->renderpass);
+
+
+	// frame buffer
+	std::vector<vk::ImageView> attachmentViews;
+	std::vector<vk::ImageSubresourceRange> imageRanges;
+
+	for (auto& elem : swapChain->buffers)
+	{
+		attachmentViews.push_back(elem.imageView);
+		imageRanges.push_back(elem.imageSubresourceRange);
+	}
+	attachmentViews.push_back(depth->imageView);
+	imageRanges.push_back(depth->imageSubresourceRange);
+
+	uint32_t maxLayers = 0;
+	for (auto& elem : imageRanges)
+	{
+		if (elem.layerCount >= maxLayers)
+		{
+			maxLayers = elem.layerCount;
+		}
+	}
+
+	vk::FramebufferCreateInfo fbci;
+	fbci.renderPass = rpData->renderpass;
+	fbci.attachmentCount = (uint32_t)attachmentViews.size();
+	fbci.pAttachments = attachmentViews.data();
+	fbci.width = swapChain->actualExtent.width;
+	fbci.height = swapChain->actualExtent.height;
+	fbci.layers = maxLayers;
+
+	rpData->frameBuffer = rpData->logicalDevice.createFramebuffer(fbci);
 
 	// TODO: clearValues
 
