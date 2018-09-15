@@ -10,22 +10,16 @@ VulkanTexture::~VulkanTexture()
 {
 	assert(logicalDevice && physicalDevice);
 
-	if (imageView)
+	for (const auto& elem : this->d_imageViewPool)
 	{
-		logicalDevice.destroyImageView(imageView);
-		imageView = nullptr;
+		assert(elem.imageView);
+		logicalDevice.destroyImageView(elem.imageView);
 	}
 
 	if (image)
 	{
 		logicalDevice.destroyImage(image);
 		image = nullptr;
-	}
-
-	if (sampler)
-	{
-		logicalDevice.destroySampler(sampler);
-		sampler = nullptr;
 	}
 
 	if (memory)
@@ -35,12 +29,48 @@ VulkanTexture::~VulkanTexture()
 	}
 }
 
-void VulkanTexture::updateDescriptor()
+
+void VulkanTexture::bind(vk::DeviceSize offset)
 {
-	assert(logicalDevice && physicalDevice);
-	descriptor.imageLayout = layout;
-	descriptor.imageView = imageView;
-	descriptor.sampler = sampler;
+	assert(physicalDevice && logicalDevice);
+	logicalDevice.bindImageMemory(image, memory, offset);
+}
+
+vk::ImageView VulkanTexture::acquireImageView(vk::ImageViewType imageViewType,
+											  vk::ComponentMapping compMapping,
+											  vk::ImageSubresourceRange range)
+{
+	assert(physicalDevice && logicalDevice && image);
+
+	for (const auto& elem : d_imageViewPool)
+	{
+		if (elem.compMapping == compMapping &&
+			elem.subresourceRange == range &&
+			elem.viewtype == imageViewType)
+		{
+			assert(elem.imageView);
+			return elem.imageView;
+		}
+	}
+
+	vk::ImageViewCreateInfo imageViewCi;
+	imageViewCi.setFormat(format);
+	imageViewCi.setImage(image);
+	imageViewCi.setComponents(compMapping);
+	imageViewCi.setSubresourceRange(range);
+	imageViewCi.setViewType(imageViewType);
+
+	auto view = logicalDevice.createImageView(imageViewCi);
+
+	VulkanImageView vulkan_image_view;
+	vulkan_image_view.compMapping = compMapping;
+	vulkan_image_view.imageView = view;
+	vulkan_image_view.subresourceRange = range;
+	vulkan_image_view.viewtype = imageViewType;
+
+	this->d_imageViewPool.push_back(vulkan_image_view);
+
+	return view;
 }
 
 std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevice> device,
@@ -58,7 +88,7 @@ std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevic
 	texture->physicalDevice = device->physicalDevice;
 	texture->logicalDevice = device->logicalDevice;
 	texture->format = format;
-	texture->layout = vk::ImageLayout::eUndefined;
+	texture->imageCreateInfo = imageCreateInfo;
 	texture->resolution = resolution;
 	texture->layerCount = arrayLayers;
 	texture->mipLevels = mipLevels;
@@ -74,10 +104,9 @@ std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevic
 		sampleCountBit,
 		vk::ImageTiling::eOptimal,
 		usage,
-		vk::SharingMode::eExclusive,
-		0, nullptr,
-		vk::ImageLayout::eUndefined
+		vk::SharingMode::eExclusive
 	);
+	imageCI.setInitialLayout(vk::ImageLayout::eUndefined);
 
 	texture->image = texture->logicalDevice.createImage(imageCI);
 	assert(texture->image);
@@ -88,22 +117,21 @@ std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevic
 	texture->alignment = memreq.alignment;
 	texture->size = memreq.size;
 
-
 	return texture;
 }
 
 vk::ImageType VulkanTexture::getImageType(const vk::Extent3D & resolution)
 {
 	int count = 0;
-	if (resolution.width == 0)
+	if (resolution.width > 1)
 	{
 		count++;
 	}
-	if (resolution.height == 0)
+	if (resolution.height > 1)
 	{
 		count++;
 	}
-	if (resolution.depth == 0)
+	if (resolution.depth > 1)
 	{
 		count++;
 	}

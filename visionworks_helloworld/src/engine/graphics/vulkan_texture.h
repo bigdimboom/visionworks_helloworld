@@ -7,6 +7,14 @@ namespace graphics
 
 class VulkanDevice;
 
+struct VulkanImageView
+{
+	vk::ImageView imageView;
+	vk::ImageViewType viewtype;
+	vk::ComponentMapping compMapping;
+	vk::ImageSubresourceRange subresourceRange;
+};
+
 class VulkanTexture
 {
 public:
@@ -17,21 +25,21 @@ public:
 	vk::Image image;
 	vk::Format format;
 	vk::Extent3D resolution;
-	vk::ImageLayout layout;
+	vk::ImageCreateFlags imageCreateInfo;
 
 	vk::DeviceMemory memory;
 	vk::MemoryPropertyFlags memoryProperties;
-	uint32_t size = 0; uint32_t alignment = 0;
-
-	vk::ImageView imageView;
-	vk::Sampler sampler;
-	
-	vk::DescriptorImageInfo descriptor;
+	vk::DeviceSize size = 0; vk::DeviceSize alignment = 0;
 
 	uint32_t mipLevels = 1;
 	uint32_t layerCount = 1;
 
-	void updateDescriptor();
+	void bind(vk::DeviceSize offset);
+
+	vk::ImageView acquireImageView(vk::ImageViewType imageViewType,
+								   vk::ComponentMapping compMapping,
+								   vk::ImageSubresourceRange range);
+
 
 	static std::shared_ptr<VulkanTexture> create(
 		std::shared_ptr<VulkanDevice> device,
@@ -54,6 +62,8 @@ private:
 	VulkanTexture(VulkanTexture&&) = delete;
 	void operator=(const VulkanTexture&) = delete;
 	void operator=(VulkanTexture&&) = delete;
+
+	std::vector<VulkanImageView> d_imageViewPool;
 };
 
 

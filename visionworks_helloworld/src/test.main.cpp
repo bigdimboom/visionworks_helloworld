@@ -68,6 +68,7 @@
 
 #include "engine/graphics/vulkan_context.h"
 #include "engine/graphics/vulkan_buffer.h"
+#include "engine/graphics/vulkan_texture.h"
 
 
 int main(int argc, const char** argv)
@@ -91,11 +92,20 @@ int main(int argc, const char** argv)
 	auto transferIndex = graphics::VulkanContext::getOptimalFamilyQueueIndex(phsycalDeviceList[0], vk::QueueFlagBits::eTransfer);
 	auto computeIndex = graphics::VulkanContext::getOptimalFamilyQueueIndex(phsycalDeviceList[0], vk::QueueFlagBits::eCompute);
 
-	auto buffer = graphics::VulkanBuffer::create(context->device->physicalDevice,
-												 context->device->logicalDevice,
+	auto buffer = graphics::VulkanBuffer::create(context->device,
 												 1024, vk::BufferUsageFlagBits::eVertexBuffer,
 												 vk::MemoryPropertyFlagBits::eHostVisible);
 
+	auto texture = graphics::VulkanTexture::create(context->device,
+												   vk::Format::eB8G8R8A8Unorm,
+												   vk::Extent3D(1024u, 1024u, 1u),
+												   vk::ImageUsageFlagBits::eColorAttachment,
+												   vk::MemoryPropertyFlagBits::eDeviceLocal);
+
+	vk::ImageSubresourceRange range(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
+	auto imageview = texture->acquireImageView(vk::ImageViewType::e2D, {}, range);
+
+	texture = nullptr;
 	buffer = nullptr;
 	context = nullptr;
 

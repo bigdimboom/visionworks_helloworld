@@ -1,5 +1,6 @@
 #include "vulkan_buffer.h"
 #include "vulkan_helper.h"
+#include "vulkan_device.h"
 #include <iostream>
 
 namespace graphics
@@ -14,28 +15,27 @@ VulkanBuffer::~VulkanBuffer()
 	}
 }
 
-std::shared_ptr<VulkanBuffer> VulkanBuffer::create(const vk::PhysicalDevice & physicaldevice,
-												   const vk::Device & logicalDevice,
+std::shared_ptr<VulkanBuffer> VulkanBuffer::create(std::shared_ptr<VulkanDevice> device,
 												   size_t size, vk::BufferUsageFlags usage,
 												   vk::MemoryPropertyFlags memtype)
 {
-	assert(physicaldevice && logicalDevice);
+	assert(device);
 	assert(size > 0);
 
 	std::shared_ptr<VulkanBuffer> bufferData(new VulkanBuffer());
-	bufferData->physicalDevice = physicaldevice;
-	bufferData->logicalDevice = logicalDevice;
+	bufferData->physicalDevice = device->physicalDevice;;
+	bufferData->logicalDevice = device->logicalDevice;
 	bufferData->usageFlags = usage;
 	bufferData->size = size;
 	bufferData->memoryProperties = memtype;
 
-	bufferData->buffer = logicalDevice.createBuffer(vk::BufferCreateInfo(
+	bufferData->buffer = device->logicalDevice.createBuffer(vk::BufferCreateInfo(
 		vk::BufferCreateFlags(), size, usage, vk::SharingMode::eExclusive
 	));
 
-	auto memreq = logicalDevice.getBufferMemoryRequirements(bufferData->buffer);
-	auto typeIndex = VulkanHelper::getMemoryTypeIndex(physicaldevice, memreq.memoryTypeBits, memtype);
-	bufferData->memory = logicalDevice.allocateMemory(vk::MemoryAllocateInfo(memreq.size, typeIndex));
+	auto memreq = device->logicalDevice.getBufferMemoryRequirements(bufferData->buffer);
+	auto typeIndex = VulkanHelper::getMemoryTypeIndex(device->physicalDevice, memreq.memoryTypeBits, memtype);
+	bufferData->memory = device->logicalDevice.allocateMemory(vk::MemoryAllocateInfo(memreq.size, typeIndex));
 	bufferData->d_pool = nullptr;
 
 	if (!bufferData->memory)

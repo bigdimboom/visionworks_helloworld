@@ -5,6 +5,8 @@
 namespace graphics
 {
 
+class VulkanDevice;
+
 class VulkanBuffer
 {
 public:
@@ -24,8 +26,7 @@ public:
 	vk::MemoryPropertyFlags memoryProperties;
 
 	static std::shared_ptr<VulkanBuffer> create(
-		const vk::PhysicalDevice& physicaldevice,
-		const vk::Device& device,
+		std::shared_ptr<VulkanDevice> device,
 		size_t size, vk::BufferUsageFlags usage,
 		vk::MemoryPropertyFlags memtype);
 
