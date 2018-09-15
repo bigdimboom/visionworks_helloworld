@@ -18,30 +18,34 @@ public:
 	vk::Format format;
 	vk::Extent3D resolution;
 	vk::ImageLayout layout;
-	vk::ImageView imageView;
-	vk::Sampler sampler;
+
 	vk::DeviceMemory memory;
 	vk::MemoryPropertyFlags memoryProperties;
+	uint32_t size = 0; uint32_t alignment = 0;
+
+	vk::ImageView imageView;
+	vk::Sampler sampler;
+	
 	vk::DescriptorImageInfo descriptor;
 
-	uint32_t mipLevels;
-	uint32_t layerCount;
+	uint32_t mipLevels = 1;
+	uint32_t layerCount = 1;
 
 	void updateDescriptor();
 
 	static std::shared_ptr<VulkanTexture> create(
 		std::shared_ptr<VulkanDevice> device,
-		vk::Format format, vk::ImageLayout layout,
+		vk::Format format,
 		vk::Extent3D resolution,
-		uint32_t mipLevels, uint32_t arrayLayers,
 		vk::ImageUsageFlags usage,
 		vk::MemoryPropertyFlags memoryProperties,
+		uint32_t mipLevels = 1, uint32_t arrayLayers = 1,
 		vk::SampleCountFlagBits sampleCountBit = vk::SampleCountFlagBits::e1,
 		vk::ImageCreateFlags imageCreateInfo = {}
 	);
 
 	/**static member functions**/
-	static vk::ImageType getImageType(std::shared_ptr<VulkanDevice> device, const vk::Extent3D & resolution);
+	static vk::ImageType getImageType(const vk::Extent3D & resolution);
 
 
 private:

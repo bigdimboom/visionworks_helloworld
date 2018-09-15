@@ -20,6 +20,8 @@ std::shared_ptr<VulkanBuffer> VulkanBuffer::create(const vk::PhysicalDevice & ph
 												   vk::MemoryPropertyFlags memtype)
 {
 	assert(physicaldevice && logicalDevice);
+	assert(size > 0);
+
 	std::shared_ptr<VulkanBuffer> bufferData(new VulkanBuffer());
 	bufferData->physicalDevice = physicaldevice;
 	bufferData->logicalDevice = logicalDevice;

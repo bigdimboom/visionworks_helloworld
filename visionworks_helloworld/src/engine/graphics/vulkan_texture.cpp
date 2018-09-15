@@ -1,6 +1,7 @@
 #include "vulkan_texture.h"
 #include <assert.h>
 #include "vulkan_device.h"
+#include "vulkan_helper.h"
 
 namespace graphics
 {
@@ -43,11 +44,11 @@ void VulkanTexture::updateDescriptor()
 }
 
 std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevice> device,
-													 vk::Format format, vk::ImageLayout layout,
+													 vk::Format format,
 													 vk::Extent3D resolution,
-													 uint32_t mipLevels, uint32_t arrayLayers,
 													 vk::ImageUsageFlags usage,
 													 vk::MemoryPropertyFlags memoryProperties,
+													 uint32_t mipLevels, uint32_t arrayLayers,
 													 vk::SampleCountFlagBits sampleCountBit,
 													 vk::ImageCreateFlags imageCreateInfo)
 {
@@ -57,7 +58,7 @@ std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevic
 	texture->physicalDevice = device->physicalDevice;
 	texture->logicalDevice = device->logicalDevice;
 	texture->format = format;
-	texture->layout = layout;
+	texture->layout = vk::ImageLayout::eUndefined;
 	texture->resolution = resolution;
 	texture->layerCount = arrayLayers;
 	texture->mipLevels = mipLevels;
@@ -65,7 +66,7 @@ std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevic
 
 	vk::ImageCreateInfo imageCI(
 		imageCreateInfo,
-		getImageType(device, resolution),
+		getImageType(resolution),
 		format,
 		resolution,
 		mipLevels,
@@ -73,21 +74,25 @@ std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevic
 		sampleCountBit,
 		vk::ImageTiling::eOptimal,
 		usage,
-		vk::SharingMode::eExclusive
+		vk::SharingMode::eExclusive,
+		0, nullptr,
+		vk::ImageLayout::eUndefined
 	);
 
 	texture->image = texture->logicalDevice.createImage(imageCI);
+	assert(texture->image);
 
-
-
-
-
+	auto memreq = texture->logicalDevice.getImageMemoryRequirements(texture->image);
+	auto typeIndex = VulkanHelper::getMemoryTypeIndex(texture->physicalDevice, memreq.memoryTypeBits, memoryProperties);
+	texture->memory = texture->logicalDevice.allocateMemory(vk::MemoryAllocateInfo(memreq.size, typeIndex));
+	texture->alignment = memreq.alignment;
+	texture->size = memreq.size;
 
 
 	return texture;
 }
 
-vk::ImageType VulkanTexture::getImageType(std::shared_ptr<VulkanDevice> device, const vk::Extent3D & resolution)
+vk::ImageType VulkanTexture::getImageType(const vk::Extent3D & resolution)
 {
 	int count = 0;
 	if (resolution.width == 0)
@@ -118,6 +123,5 @@ vk::ImageType VulkanTexture::getImageType(std::shared_ptr<VulkanDevice> device, 
 
 	return vk::ImageType::e2D;
 }
-
 
 } // end namespace graphics
