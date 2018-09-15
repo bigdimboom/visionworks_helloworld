@@ -40,8 +40,6 @@ public:
 	/**test if the format is a stencil format**/
 	static bool isStencilFormat(const vk::Format& format);
 
-
-
 	/*load shader module*/
 	static vk::ShaderModule loadShaderSPIRV(const char *fileName, const vk::Device& device);
 	static vk::ShaderModule loadShaderGLSL(const char *fileName, const vk::Device& device, vk::ShaderStageFlagBits stage);
