@@ -25,6 +25,7 @@ public:
 	vk::Image image;
 	vk::Format format;
 	vk::Extent3D resolution;
+	vk::ImageUsageFlags usage;
 	vk::ImageCreateFlags imageCreateInfo;
 
 	vk::DeviceMemory memory;

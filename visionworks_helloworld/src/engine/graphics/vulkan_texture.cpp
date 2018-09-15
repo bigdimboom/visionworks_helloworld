@@ -90,6 +90,7 @@ std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevic
 	texture->format = format;
 	texture->imageCreateInfo = imageCreateInfo;
 	texture->resolution = resolution;
+	texture->usage = usage;
 	texture->layerCount = arrayLayers;
 	texture->mipLevels = mipLevels;
 	texture->memoryProperties = memoryProperties;
