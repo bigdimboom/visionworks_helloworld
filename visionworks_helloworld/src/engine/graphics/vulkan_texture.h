@@ -1,5 +1,6 @@
 #pragma once
 #include <vulkan/vulkan.hpp>
+// too much variable for based class?
 
 namespace graphics
 {
