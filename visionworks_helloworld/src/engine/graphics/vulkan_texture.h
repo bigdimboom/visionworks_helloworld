@@ -15,13 +15,19 @@ struct VulkanImageView
 	vk::ImageSubresourceRange subresourceRange;
 };
 
+struct VulkanImageSampler
+{
+	vk::Sampler sampler;
+	vk::SamplerCreateInfo samplerInfo;
+};
+
 class VulkanTexture
 {
 public:
 	~VulkanTexture();
 
-	vk::PhysicalDevice physicalDevice;
-	vk::Device logicalDevice;
+	std::shared_ptr<VulkanDevice> device;
+
 	vk::Image image;
 	vk::Format format;
 	vk::Extent3D resolution;
@@ -40,6 +46,15 @@ public:
 	vk::ImageView acquireImageView(vk::ImageViewType imageViewType,
 								   vk::ComponentMapping compMapping,
 								   vk::ImageSubresourceRange range);
+
+	vk::Sampler acquireImageSampler(vk::Filter minFilter = vk::Filter::eLinear,
+									vk::Filter magFilter = vk::Filter::eLinear,
+									vk::SamplerMipmapMode mipmapMode = vk::SamplerMipmapMode::eLinear,
+									vk::SamplerAddressMode addrMode = vk::SamplerAddressMode::eClampToEdge,
+									float minLod = 0.0f, float maxLod = 1.0, float lodBias = 0.0f,
+									vk::CompareOp compareOp = vk::CompareOp::eNever);
+
+	vk::Sampler acquireImageSampler(vk::SamplerCreateInfo ci);
 
 
 	static std::shared_ptr<VulkanTexture> create(
@@ -65,6 +80,7 @@ private:
 	void operator=(VulkanTexture&&) = delete;
 
 	std::vector<VulkanImageView> d_imageViewPool;
+	std::vector<VulkanImageSampler> d_imageSamplerPool;
 };
 
 

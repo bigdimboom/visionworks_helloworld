@@ -104,6 +104,8 @@ int main(int argc, const char** argv)
 
 	vk::ImageSubresourceRange range(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
 	auto imageview = texture->acquireImageView(vk::ImageViewType::e2D, {}, range);
+	auto imagesampler = texture->acquireImageSampler();
+
 
 	texture = nullptr;
 	buffer = nullptr;

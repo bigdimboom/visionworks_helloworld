@@ -8,23 +8,29 @@ namespace graphics
 
 VulkanTexture::~VulkanTexture()
 {
-	assert(logicalDevice && physicalDevice);
+	assert(device);
 
 	for (const auto& elem : this->d_imageViewPool)
 	{
 		assert(elem.imageView);
-		logicalDevice.destroyImageView(elem.imageView);
+		device->logicalDevice.destroyImageView(elem.imageView);
+	}
+
+	for (const auto& elem : this->d_imageSamplerPool)
+	{
+		assert(elem.sampler);
+		device->logicalDevice.destroySampler(elem.sampler);
 	}
 
 	if (image)
 	{
-		logicalDevice.destroyImage(image);
+		device->logicalDevice.destroyImage(image);
 		image = nullptr;
 	}
 
 	if (memory)
 	{
-		logicalDevice.freeMemory(memory);
+		device->logicalDevice.freeMemory(memory);
 		memory = nullptr;
 	}
 }
@@ -32,15 +38,15 @@ VulkanTexture::~VulkanTexture()
 
 void VulkanTexture::bind(vk::DeviceSize offset)
 {
-	assert(physicalDevice && logicalDevice);
-	logicalDevice.bindImageMemory(image, memory, offset);
+	assert(device);
+	device->logicalDevice.bindImageMemory(image, memory, offset);
 }
 
 vk::ImageView VulkanTexture::acquireImageView(vk::ImageViewType imageViewType,
 											  vk::ComponentMapping compMapping,
 											  vk::ImageSubresourceRange range)
 {
-	assert(physicalDevice && logicalDevice && image);
+	assert(device && image);
 
 	for (const auto& elem : d_imageViewPool)
 	{
@@ -60,7 +66,7 @@ vk::ImageView VulkanTexture::acquireImageView(vk::ImageViewType imageViewType,
 	imageViewCi.setSubresourceRange(range);
 	imageViewCi.setViewType(imageViewType);
 
-	auto view = logicalDevice.createImageView(imageViewCi);
+	auto view = device->logicalDevice.createImageView(imageViewCi);
 
 	VulkanImageView vulkan_image_view;
 	vulkan_image_view.compMapping = compMapping;
@@ -71,6 +77,76 @@ vk::ImageView VulkanTexture::acquireImageView(vk::ImageViewType imageViewType,
 	this->d_imageViewPool.push_back(vulkan_image_view);
 
 	return view;
+}
+
+vk::Sampler VulkanTexture::acquireImageSampler(vk::Filter minFilter, 
+											   vk::Filter magFilter, 
+											   vk::SamplerMipmapMode mipmapMode, 
+											   vk::SamplerAddressMode addrMode, 
+											   float minLod, float maxLod, float lodBias,
+											   vk::CompareOp compareOp)
+{
+	assert(device);
+
+	for (const auto& elem : d_imageSamplerPool)
+	{
+		if (elem.samplerInfo.minFilter == minFilter &&
+			elem.samplerInfo.magFilter == magFilter &&
+			elem.samplerInfo.mipmapMode == mipmapMode &&
+			elem.samplerInfo.addressModeU == addrMode &&
+			elem.samplerInfo.compareOp == compareOp)
+		{
+			return elem.sampler;
+		}
+	}
+
+	vk::SamplerCreateInfo samplerCreateInfo = {};
+	samplerCreateInfo.minFilter = minFilter;
+	samplerCreateInfo.magFilter = magFilter;
+	samplerCreateInfo.mipmapMode = mipmapMode;
+	samplerCreateInfo.addressModeU = addrMode;
+	samplerCreateInfo.addressModeV = addrMode;
+	samplerCreateInfo.addressModeW = addrMode;
+	samplerCreateInfo.mipLodBias = lodBias;
+	samplerCreateInfo.compareOp = compareOp;
+	samplerCreateInfo.minLod = minLod;
+	samplerCreateInfo.maxLod = maxLod;
+
+	// Only enable anisotropic filtering if enabled on the devicec
+	samplerCreateInfo.maxAnisotropy = device->enabledFeatures.samplerAnisotropy ? device->properties.limits.maxSamplerAnisotropy : 1.0f;
+	samplerCreateInfo.anisotropyEnable = device->enabledFeatures.samplerAnisotropy;
+	samplerCreateInfo.borderColor = vk::BorderColor::eFloatOpaqueWhite;
+
+	auto sampler = vk::Device(*device).createSampler(samplerCreateInfo);
+
+	VulkanImageSampler samplerData;
+	samplerData.sampler = sampler;
+	samplerData.samplerInfo = samplerCreateInfo;
+	d_imageSamplerPool.push_back(samplerData);
+
+	return sampler;
+}
+
+vk::Sampler VulkanTexture::acquireImageSampler(vk::SamplerCreateInfo ci)
+{
+	assert(device);
+	for (const auto& elem : d_imageSamplerPool)
+	{
+		if (elem.samplerInfo == ci)
+		{
+			return elem.sampler;
+		}
+	}
+
+
+	auto sampler = vk::Device(*device).createSampler(ci);
+
+	VulkanImageSampler samplerData;
+	samplerData.sampler = sampler;
+	samplerData.samplerInfo = ci;
+	d_imageSamplerPool.push_back(samplerData);
+
+	return sampler;
 }
 
 std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevice> device,
@@ -85,8 +161,7 @@ std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevic
 	assert(vk::Device(*device));
 
 	auto texture = std::shared_ptr<VulkanTexture>(new VulkanTexture());
-	texture->physicalDevice = device->physicalDevice;
-	texture->logicalDevice = device->logicalDevice;
+	texture->device = device;
 	texture->format = format;
 	texture->imageCreateInfo = imageCreateInfo;
 	texture->resolution = resolution;
@@ -109,12 +184,12 @@ std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevic
 	);
 	imageCI.setInitialLayout(vk::ImageLayout::eUndefined);
 
-	texture->image = texture->logicalDevice.createImage(imageCI);
+	texture->image = vk::Device(*texture->device).createImage(imageCI);
 	assert(texture->image);
 
-	auto memreq = texture->logicalDevice.getImageMemoryRequirements(texture->image);
-	auto typeIndex = VulkanHelper::getMemoryTypeIndex(texture->physicalDevice, memreq.memoryTypeBits, memoryProperties);
-	texture->memory = texture->logicalDevice.allocateMemory(vk::MemoryAllocateInfo(memreq.size, typeIndex));
+	auto memreq = vk::Device(*texture->device).getImageMemoryRequirements(texture->image);
+	auto typeIndex = VulkanHelper::getMemoryTypeIndex(texture->device->physicalDevice, memreq.memoryTypeBits, memoryProperties);
+	texture->memory = vk::Device(*texture->device).allocateMemory(vk::MemoryAllocateInfo(memreq.size, typeIndex));
 	texture->alignment = memreq.alignment;
 	texture->size = memreq.size;
 
