@@ -21,7 +21,7 @@ public:
 	/** @brief Usage flags to be filled by external source at buffer creation (to query at some later point) */
 	vk::BufferUsageFlags usageFlags;
 	/** @brief Memory propertys flags to be filled by external source at buffer creation (to query at some later point) */
-	vk::MemoryPropertyFlags memoryPropertyFlags;
+	vk::MemoryPropertyFlags memoryProperties;
 
 	static std::shared_ptr<VulkanBuffer> create(
 		const vk::PhysicalDevice& physicaldevice,

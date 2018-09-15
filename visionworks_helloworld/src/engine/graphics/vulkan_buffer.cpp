@@ -25,7 +25,7 @@ std::shared_ptr<VulkanBuffer> VulkanBuffer::create(const vk::PhysicalDevice & ph
 	bufferData->logicalDevice = logicalDevice;
 	bufferData->usageFlags = usage;
 	bufferData->size = size;
-	bufferData->memoryPropertyFlags = memtype;
+	bufferData->memoryProperties = memtype;
 
 	bufferData->buffer = logicalDevice.createBuffer(vk::BufferCreateInfo(
 		vk::BufferCreateFlags(), size, usage, vk::SharingMode::eExclusive
@@ -109,7 +109,7 @@ bool VulkanBuffer::isHostVisible() const
 {
 	assert(logicalDevice && physicalDevice);
 
-	if ((memoryPropertyFlags & vk::MemoryPropertyFlagBits::eHostVisible))
+	if ((memoryProperties & vk::MemoryPropertyFlagBits::eHostVisible))
 	{
 		return true;
 	}
