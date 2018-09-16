@@ -66,7 +66,7 @@ public:
 									vk::CompareOp compareOp = vk::CompareOp::eNever);
 
 	vk::Sampler acquireImageSampler(vk::SamplerCreateInfo ci);
-	
+
 
 	/**@ return nullptr means "can't find"**/
 	vk::Sampler acquireImageSampler(int handle);
@@ -75,6 +75,10 @@ public:
 	int findImageSamplerHandle(vk::Sampler sampler);
 
 
+	vk::DescriptorImageInfo setupDescriptor(vk::ImageView view, vk::Sampler sampler);
+
+
+	/**static create functions**/
 	static std::shared_ptr<VulkanTexture> create(
 		std::shared_ptr<VulkanDevice> device,
 		vk::Format format,

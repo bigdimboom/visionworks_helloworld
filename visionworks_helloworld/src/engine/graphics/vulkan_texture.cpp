@@ -203,6 +203,12 @@ int VulkanTexture::findImageSamplerHandle(vk::Sampler sampler)
 	return -1;
 }
 
+vk::DescriptorImageInfo VulkanTexture::setupDescriptor(vk::ImageView view, vk::Sampler sampler)
+{
+	assert(device);
+	return vk::DescriptorImageInfo(sampler, view, layout);
+}
+
 std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevice> device,
 													 vk::Format format,
 													 vk::Extent3D resolution,
