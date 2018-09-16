@@ -49,6 +49,15 @@ public:
 		std::shared_ptr<VulkanDepthResource> depth
 	);
 
+	/**
+	* Creates a default sampler for sampling from any of the framebuffer attachments
+	* Applications are free to create their own samplers for different use cases
+	*
+	* @param magFilter Magnification filter for lookups
+	* @param minFilter Minification filter for lookups
+	* @param adressMode Adressing mode for the U,V and W coordinates
+	*
+	*/
 	vk::Sampler acquireSampler(vk::Filter magFilter, vk::Filter minFilter, vk::SamplerAddressMode adressMode);
 
 
