@@ -7,6 +7,15 @@ namespace graphics
 
 class VulkanDevice;
 
+struct BufferTransition
+{
+	vk::Buffer buffer;
+	vk::AccessFlags currentAccess;
+	vk::AccessFlags newAccess;
+	uint32_t currentQueueFamily;
+	uint32_t newQueueFamily;
+};
+
 class VulkanBuffer
 {
 public:
@@ -97,6 +106,11 @@ public:
 	bool isHostVisible() const;
 
 
+	/*STATIC MEMBER FUNCTIONS*/
+	static void setBufferMemoryBarrier(vk::CommandBuffer commandBuffer,
+									   vk::PipelineStageFlags sourceStage,
+									   vk::PipelineStageFlags destinationStage,
+									   std::vector<BufferTransition> bufferTransitions);
 
 
 private:

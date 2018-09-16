@@ -118,4 +118,35 @@ bool VulkanBuffer::isHostVisible() const
 	return false;
 }
 
+/*STATIC MEMBER FUNCTIONS*/
+void VulkanBuffer::setBufferMemoryBarrier(vk::CommandBuffer commandBuffer, 
+										  vk::PipelineStageFlags srcMask, 
+										  vk::PipelineStageFlags tgtMask, 
+										  std::vector<BufferTransition> bufferTransitions)
+{
+	assert(commandBuffer);
+
+	std::vector<vk::BufferMemoryBarrier> buffer_memory_barriers;
+
+	for (auto & elem : bufferTransitions)
+	{
+		vk::BufferMemoryBarrier tmp;
+		tmp.buffer = elem.buffer;
+		tmp.dstAccessMask = elem.newAccess;
+		tmp.srcAccessMask = elem.currentAccess;
+		tmp.srcQueueFamilyIndex = elem.currentQueueFamily;
+		tmp.dstQueueFamilyIndex = elem.newQueueFamily;
+		tmp.offset = 0;
+		tmp.size = VK_WHOLE_SIZE;
+		tmp.pNext = nullptr;
+
+		buffer_memory_barriers.push_back(tmp);
+	}
+
+	if (buffer_memory_barriers.size() > 0)
+	{
+		commandBuffer.pipelineBarrier(srcMask, tgtMask, {}, {}, buffer_memory_barriers, {});
+	}
+}
+
 } // end namespace graphics
