@@ -12,8 +12,8 @@ class VulkanBuffer
 public:
 	~VulkanBuffer();
 
-	vk::PhysicalDevice physicalDevice;
-	vk::Device logicalDevice;
+	std::shared_ptr<VulkanDevice> device;
+
 	vk::Buffer buffer;
 	vk::DeviceMemory memory;
 	vk::DescriptorBufferInfo descriptor;

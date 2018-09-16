@@ -8,10 +8,11 @@ namespace graphics
 
 VulkanBuffer::~VulkanBuffer()
 {
+	assert(vk::Device(*device));
 	if (memory)
 	{
-		logicalDevice.freeMemory(memory);
-		logicalDevice.destroyBuffer(buffer);
+		vk::Device(*device).freeMemory(memory);
+		vk::Device(*device).destroyBuffer(buffer);
 	}
 }
 
@@ -23,8 +24,7 @@ std::shared_ptr<VulkanBuffer> VulkanBuffer::create(std::shared_ptr<VulkanDevice>
 	assert(size > 0);
 
 	std::shared_ptr<VulkanBuffer> bufferData(new VulkanBuffer());
-	bufferData->physicalDevice = device->physicalDevice;;
-	bufferData->logicalDevice = device->logicalDevice;
+	bufferData->device = device;
 	bufferData->usageFlags = usage;
 	bufferData->size = size;
 	bufferData->memoryProperties = memtype;
@@ -54,26 +54,26 @@ std::shared_ptr<VulkanBuffer> VulkanBuffer::create(std::shared_ptr<VulkanDevice>
 
 void * VulkanBuffer::map(vk::DeviceSize size, vk::DeviceSize offset)
 {
-	assert(logicalDevice && physicalDevice && memory);
+	assert(device && memory);
 	assert(isHostVisible());
-	return logicalDevice.mapMemory(memory, offset, size);
+	return vk::Device(*device).mapMemory(memory, offset, size);
 }
 
 void VulkanBuffer::unmap()
 {
-	assert(logicalDevice && physicalDevice && memory);
-	logicalDevice.unmapMemory(memory);
+	assert(device && memory);
+	vk::Device(*device).unmapMemory(memory);
 }
 
 void VulkanBuffer::bind(vk::DeviceSize offset)
 {
-	assert(logicalDevice && buffer && memory);
-	logicalDevice.bindBufferMemory(buffer, memory, offset);
+	assert(device && buffer && memory);
+	vk::Device(*device).bindBufferMemory(buffer, memory, offset);
 }
 
 void VulkanBuffer::setupDescriptor(vk::DeviceSize size, vk::DeviceSize offset)
 {
-	assert(physicalDevice && logicalDevice);
+	assert(device);
 	descriptor.buffer = buffer;
 	descriptor.offset = offset;
 	descriptor.range = size;
@@ -89,27 +89,27 @@ void VulkanBuffer::upload(void * data, vk::DeviceSize size)
 
 void VulkanBuffer::flush(vk::DeviceSize size, vk::DeviceSize offset)
 {
-	assert(physicalDevice && logicalDevice);
+	assert(device);
 	vk::MappedMemoryRange mappedRange = {};
 	mappedRange.memory = memory;
 	mappedRange.offset = offset;
 	mappedRange.size = size;
-	logicalDevice.flushMappedMemoryRanges(mappedRange);
+	vk::Device(*device).flushMappedMemoryRanges(mappedRange);
 }
 
 void VulkanBuffer::invalidate(vk::DeviceSize size, vk::DeviceSize offset)
 {
-	assert(physicalDevice && logicalDevice);
+	assert(device);
 	vk::MappedMemoryRange mappedRange = {};
 	mappedRange.memory = memory;
 	mappedRange.offset = offset;
 	mappedRange.size = size;
-	logicalDevice.invalidateMappedMemoryRanges(mappedRange);
+	vk::Device(*device).invalidateMappedMemoryRanges(mappedRange);
 }
 
 bool VulkanBuffer::isHostVisible() const
 {
-	assert(logicalDevice && physicalDevice);
+	assert(device);
 
 	if ((memoryProperties & vk::MemoryPropertyFlagBits::eHostVisible))
 	{
