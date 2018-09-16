@@ -36,28 +36,61 @@ private:
 	void operator=(VulkanShader&&) = delete;
 };
 
+
+
+struct VertexInput
+{
+	vk::VertexInputBindingDescription binding;
+	std::vector<vk::VertexInputAttributeDescription> attributes;
+};
+
+struct ViewportInfo
+{
+	std::vector<vk::Viewport> viewports;
+	std::vector<vk::Rect2D> scissors;
+};
+
 class VulkanPipeline
 {
 public:
+
 	~VulkanPipeline();
 
 	vk::Device logicalDevice;
 	vk::DescriptorPool descriptorPool;
 
+	// shader states
 	std::vector<vk::PipelineShaderStageCreateInfo> shaderStages;
-	vk::PipelineVertexInputStateCreateInfo vertexInputeInfo;
+
+	// vtx states
+	vk::PipelineVertexInputStateCreateInfo vertexInputStateInfo;
+	vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStateInfo;
+
+	// TODO: TessellationState
+
+	// Viewport
+	vk::PipelineViewportStateCreateInfo viewportInfo;
 
 	static std::shared_ptr<VulkanPipeline> create(vk::Device logicalDevice, vk::DescriptorPool descriptorPool);
 
+	// shader methods
 	void addShader(std::shared_ptr<VulkanShader> shader);
 	void addShaderGLSL(const char* shaderFilepath, vk::ShaderStageFlagBits shaderStage);
 	void addShaderSPIRV(const char* shaderFilepath, vk::ShaderStageFlagBits shaderStage);
 	
-	// TODO:
+	// vtx methods
+	void addVertexInputBinding(const vk::VertexInputBindingDescription& binding);
+	void setVertexInputAttrib(const vk::VertexInputAttributeDescription& inputVertexAttrib);
+	void specifyInputAssemblyState(vk::PrimitiveTopology topology, bool primitive_restart_enable = false);
 	
+	// viewport methods
+	void addViewport(const vk::Viewport& viewport);
+	void addScissor(const vk::Rect2D& scissors);
+	void specifyViewportAndScissorTestState(const ViewportInfo& info);
 	
-	
-	
+
+
+
 	void build();
 
 
@@ -69,8 +102,12 @@ private:
 	void operator=(VulkanPipeline&&) = delete;
 
 	std::unordered_map<vk::ShaderStageFlagBits, std::shared_ptr<VulkanShader>> d_shaders;
+	std::unordered_map<uint32_t, VertexInput> d_vertexInputStates;
 
+	std::vector<vk::VertexInputBindingDescription> d_vertexBindings;
+	std::vector<vk::VertexInputAttributeDescription> d_vertexAttributes;
 
+	ViewportInfo d_viewportInfoData;
 };
 
 } // end namespace graphics
