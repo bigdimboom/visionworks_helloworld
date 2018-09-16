@@ -40,6 +40,8 @@ public:
 																 vk::CommandBufferLevel& level,
 																 uint32_t count);
 
+	static vk::Semaphore createSemaphore(const vk::Device& logicalDevice);
+
 
 	/**test if the format is a depth format**/
 	static bool isDepthFormat(const vk::Format& format);
