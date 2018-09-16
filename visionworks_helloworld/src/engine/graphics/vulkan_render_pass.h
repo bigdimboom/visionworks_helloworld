@@ -56,6 +56,7 @@ public:
 	* @param magFilter Magnification filter for lookups
 	* @param minFilter Minification filter for lookups
 	* @param adressMode Adressing mode for the U,V and W coordinates
+	* user should not delete vk::imageView, RAII is applied in this object
 	*
 	*/
 	vk::Sampler acquireSampler(vk::Filter magFilter, vk::Filter minFilter, vk::SamplerAddressMode adressMode);

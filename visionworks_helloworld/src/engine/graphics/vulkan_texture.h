@@ -43,13 +43,13 @@ public:
 
 	void bind(vk::DeviceSize offset);
 
-	/**image view can be acquired by this functions**/
+	/**image view can be acquired by this functions, user should not delete vk::imageView, RAII is applied in this object**/
 	vk::ImageView acquireImageView(vk::ImageViewType imageViewType,
 								   vk::ComponentMapping compMapping,
 								   vk::ImageSubresourceRange range);
 
 
-	/**image sampler can be acquired by these functions**/
+	/**image sampler can be acquired by these functions, user should not delete vk::imageView, RAII is applied in this object**/
 	vk::Sampler acquireImageSampler(vk::Filter minFilter = vk::Filter::eLinear,
 									vk::Filter magFilter = vk::Filter::eLinear,
 									vk::SamplerMipmapMode mipmapMode = vk::SamplerMipmapMode::eLinear,
