@@ -49,7 +49,7 @@ public:
 		std::shared_ptr<VulkanDepthResource> depth
 	);
 
-	//static std::shared_ptr<VulkanRenderPass> create();
+	vk::Sampler acquireSampler(vk::Filter magFilter, vk::Filter minFilter, vk::SamplerAddressMode adressMode);
 
 
 private:
@@ -58,6 +58,13 @@ private:
 	VulkanRenderPass(VulkanRenderPass&&) = delete;
 	void operator=(const VulkanRenderPass&) = delete;
 	void operator=(VulkanRenderPass&&) = delete;
+
+	struct 
+	{
+		vk::SamplerCreateInfo info;
+		vk::Sampler sampler;
+	}d_samplerData;
+
 };
 
 } // end namespace graphics

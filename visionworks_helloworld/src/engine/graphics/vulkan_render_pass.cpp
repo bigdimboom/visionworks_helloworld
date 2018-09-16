@@ -36,6 +36,13 @@ VulkanRenderPass::~VulkanRenderPass()
 		logicalDevice.destroyFramebuffer(frameBuffer);
 		frameBuffer = nullptr;
 	}
+
+	if (d_samplerData.sampler)
+	{
+		assert(logicalDevice);
+		logicalDevice.destroySampler(d_samplerData.sampler);
+		d_samplerData.sampler = nullptr;
+	}
 }
 
 std::shared_ptr<VulkanRenderPass> VulkanRenderPass::create(std::shared_ptr<VulkanSwapChain> swapChain,
@@ -173,6 +180,44 @@ std::shared_ptr<VulkanRenderPass> VulkanRenderPass::create(std::shared_ptr<Vulka
 	// TODO: clearValues
 
 	return rpData;
+}
+
+vk::Sampler VulkanRenderPass::acquireSampler(vk::Filter magFilter, 
+											 vk::Filter minFilter, 
+											 vk::SamplerAddressMode adressMode)
+{
+	assert(physicalDevice && logicalDevice);
+
+	if (d_samplerData.info.minFilter == magFilter &&
+		d_samplerData.info.minFilter == minFilter &&
+		d_samplerData.info.addressModeU == adressMode &&
+		d_samplerData.info.addressModeU == adressMode &&
+		d_samplerData.info.addressModeU == adressMode)
+	{
+		return d_samplerData.sampler;
+	}
+
+	if (d_samplerData.sampler)
+	{
+		logicalDevice.destroySampler(d_samplerData.sampler);
+		d_samplerData.sampler = nullptr;
+	}
+
+	d_samplerData.info.magFilter = magFilter;
+	d_samplerData.info.minFilter = minFilter;
+	d_samplerData.info.mipmapMode = vk::SamplerMipmapMode::eLinear;
+	d_samplerData.info.addressModeU = adressMode;
+	d_samplerData.info.addressModeV = adressMode;
+	d_samplerData.info.addressModeW = adressMode;
+	d_samplerData.info.mipLodBias = 0.0f;
+	d_samplerData.info.maxAnisotropy = 1.0f;
+	d_samplerData.info.minLod = 0.0f;
+	d_samplerData.info.maxLod = 1.0f;
+	d_samplerData.info.borderColor = vk::BorderColor::eFloatOpaqueWhite;;
+
+	d_samplerData.sampler = logicalDevice.createSampler(d_samplerData.info);
+
+	return d_samplerData.sampler;
 }
 
 
