@@ -20,6 +20,7 @@
     <ClCompile Include="src\engine\graphics\vulkan_device.cpp" />
     <ClCompile Include="src\engine\graphics\vulkan_helper.cpp" />
     <ClCompile Include="src\engine\graphics\vulkan_render_pass.cpp" />
+    <ClCompile Include="src\engine\graphics\vulkan_shader.cpp" />
     <ClCompile Include="src\engine\graphics\vulkan_swapchain.cpp" />
     <ClCompile Include="src\engine\graphics\vulkan_texture.cpp" />
     <ClCompile Include="src\engine\graphics\vulkan_window.cpp" />
@@ -39,6 +40,7 @@
     <ClInclude Include="src\engine\graphics\vulkan_device.h" />
     <ClInclude Include="src\engine\graphics\vulkan_helper.h" />
     <ClInclude Include="src\engine\graphics\vulkan_render_pass.h" />
+    <ClInclude Include="src\engine\graphics\vulkan_shader.h" />
     <ClInclude Include="src\engine\graphics\vulkan_swapchain.h" />
     <ClInclude Include="src\engine\graphics\vulkan_texture.h" />
     <ClInclude Include="src\engine\graphics\vulkan_window.h" />
