@@ -106,6 +106,9 @@ int main(int argc, const char** argv)
 	auto imageview = texture->acquireImageView(vk::ImageViewType::e2D, {}, range);
 	auto imagesampler = texture->acquireImageSampler();
 
+	auto renderpass_sampler = context->defaultRenderPass->acquireSampler(vk::Filter::eLinear,
+																		 vk::Filter::eLinear,
+																		 vk::SamplerAddressMode::eMirroredRepeat);
 
 	texture = nullptr;
 	buffer = nullptr;
