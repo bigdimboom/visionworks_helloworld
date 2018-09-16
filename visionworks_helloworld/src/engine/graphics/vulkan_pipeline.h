@@ -11,11 +11,11 @@ class VulkanShader
 {
 public:
 	~VulkanShader();
-	
+
 	vk::Device logicalDevice;
 	vk::ShaderStageFlagBits shaderStage;
 	vk::PipelineShaderStageCreateInfo pipelineShaderInfo;
-	
+
 	static std::shared_ptr<VulkanShader> createWithSPIRV(
 		vk::Device logicalDevice,
 		const char* SPIRVFilePath,
@@ -71,23 +71,35 @@ public:
 	// Viewport
 	vk::PipelineViewportStateCreateInfo viewportInfo;
 
+	// multisample
+	vk::PipelineMultisampleStateCreateInfo multiSampleInfo;
+
+
 	static std::shared_ptr<VulkanPipeline> create(vk::Device logicalDevice, vk::DescriptorPool descriptorPool);
 
 	// shader methods
 	void addShader(std::shared_ptr<VulkanShader> shader);
 	void addShaderGLSL(const char* shaderFilepath, vk::ShaderStageFlagBits shaderStage);
 	void addShaderSPIRV(const char* shaderFilepath, vk::ShaderStageFlagBits shaderStage);
-	
+
 	// vtx methods
 	void addVertexInputBinding(const vk::VertexInputBindingDescription& binding);
 	void setVertexInputAttrib(const vk::VertexInputAttributeDescription& inputVertexAttrib);
 	void specifyInputAssemblyState(vk::PrimitiveTopology topology, bool primitive_restart_enable = false);
-	
+
 	// viewport methods
 	void addViewport(const vk::Viewport& viewport);
 	void addScissor(const vk::Rect2D& scissors);
 	void specifyViewportAndScissorTestState(const ViewportInfo& info);
-	
+
+	// multisample
+	void specifyMultisampleState(vk::SampleCountFlagBits sample_count,
+								 bool per_sample_shading_enable,
+								 float min_sample_shading,
+								 const vk::SampleMask * sample_masks,
+								 bool alpha_to_coverage_enable,
+								 bool alpha_to_one_enable);
+
 
 
 

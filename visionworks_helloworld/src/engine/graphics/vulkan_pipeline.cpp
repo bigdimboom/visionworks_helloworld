@@ -57,6 +57,15 @@ std::shared_ptr<VulkanPipeline> VulkanPipeline::create(vk::Device logicalDevice,
 	auto program = std::shared_ptr<VulkanPipeline>(new VulkanPipeline());
 	program->descriptorPool = descriptorPool;
 	program->logicalDevice = logicalDevice;
+	program->multiSampleInfo = vk::PipelineMultisampleStateCreateInfo(
+		vk::PipelineMultisampleStateCreateFlags(),
+		vk::SampleCountFlagBits::e1,
+		VK_FALSE,
+		1.0f,
+		nullptr,
+		VK_FALSE,
+		VK_FALSE);
+
 	return program;
 }
 
@@ -118,6 +127,21 @@ void VulkanPipeline::specifyViewportAndScissorTestState(const ViewportInfo & inf
 {
 	assert(logicalDevice && descriptorPool);
 	d_viewportInfoData = info;
+}
+
+void VulkanPipeline::specifyMultisampleState(vk::SampleCountFlagBits sample_count, 
+											 bool per_sample_shading_enable, 
+											 float min_sample_shading,
+											 const vk::SampleMask * sample_masks, 
+											 bool alpha_to_coverage_enable, bool alpha_to_one_enable)
+{
+	assert(logicalDevice && descriptorPool);
+	multiSampleInfo.setAlphaToCoverageEnable(alpha_to_coverage_enable);
+	multiSampleInfo.setAlphaToOneEnable(alpha_to_one_enable);
+	multiSampleInfo.setMinSampleShading(min_sample_shading);
+	multiSampleInfo.setPSampleMask(sample_masks);
+	multiSampleInfo.setRasterizationSamples(sample_count);
+	multiSampleInfo.setSampleShadingEnable(per_sample_shading_enable);
 }
 
 void VulkanPipeline::build()
