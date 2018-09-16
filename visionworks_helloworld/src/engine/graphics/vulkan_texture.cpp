@@ -44,9 +44,12 @@ void VulkanTexture::bind(vk::DeviceSize offset)
 
 vk::ImageView VulkanTexture::acquireImageView(vk::ImageViewType imageViewType,
 											  vk::ComponentMapping compMapping,
-											  vk::ImageSubresourceRange range)
+											  vk::ImageSubresourceRange range,
+											  int* indexHandle)
 {
 	assert(device && image);
+
+	int count = 0;
 
 	for (const auto& elem : d_imageViewPool)
 	{
@@ -55,8 +58,16 @@ vk::ImageView VulkanTexture::acquireImageView(vk::ImageViewType imageViewType,
 			elem.viewtype == imageViewType)
 		{
 			assert(elem.imageView);
+
+			if (indexHandle)
+			{
+				*indexHandle = count;
+			}
+
 			return elem.imageView;
 		}
+
+		++count;
 	}
 
 	vk::ImageViewCreateInfo imageViewCi;
@@ -76,7 +87,31 @@ vk::ImageView VulkanTexture::acquireImageView(vk::ImageViewType imageViewType,
 
 	this->d_imageViewPool.push_back(vulkan_image_view);
 
+	if (indexHandle)
+	{
+		*indexHandle = (int)d_imageViewPool.size() - 1;
+	}
+
 	return view;
+}
+
+int VulkanTexture::findImageViewHandle(vk::ImageView view)
+{
+	for (int i = 0; i < (int)d_imageViewPool.size(); ++i)
+	{
+		if (d_imageViewPool[i].imageView == view)
+		{
+			return i;
+		}
+	}
+	
+	return -1;
+}
+
+vk::ImageView VulkanTexture::acquireImageView(int handle)
+{
+	assert(device && handle < d_imageViewPool.size());
+	return d_imageViewPool[handle].imageView;
 }
 
 vk::Sampler VulkanTexture::acquireImageSampler(vk::Filter minFilter, 
@@ -147,6 +182,25 @@ vk::Sampler VulkanTexture::acquireImageSampler(vk::SamplerCreateInfo ci)
 	d_imageSamplerPool.push_back(samplerData);
 
 	return sampler;
+}
+
+vk::Sampler VulkanTexture::acquireImageSampler(int handle)
+{
+	assert(device && handle < d_imageSamplerPool.size());
+	return d_imageSamplerPool[handle].sampler;
+}
+
+int VulkanTexture::findImageSamplerHandle(vk::Sampler sampler)
+{
+	for (int i = 0; i < (int)d_imageSamplerPool.size(); ++i)
+	{
+		if (d_imageSamplerPool[i].sampler == sampler)
+		{
+			return i;
+		}
+	}
+
+	return -1;
 }
 
 std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevice> device,

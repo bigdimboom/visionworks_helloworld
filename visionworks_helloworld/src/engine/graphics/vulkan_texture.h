@@ -46,7 +46,14 @@ public:
 	/**image view can be acquired by this functions, user should not delete vk::imageView, RAII is applied in this object**/
 	vk::ImageView acquireImageView(vk::ImageViewType imageViewType,
 								   vk::ComponentMapping compMapping,
-								   vk::ImageSubresourceRange range);
+								   vk::ImageSubresourceRange range,
+								   int* indexHandle = nullptr);
+
+	/**@ return -1 means "can't find"**/
+	int findImageViewHandle(vk::ImageView view);
+
+	/**@ return nullptr means "can't find"**/
+	vk::ImageView acquireImageView(int handle);
 
 
 	/**image sampler can be acquired by these functions, user should not delete vk::imageView, RAII is applied in this object**/
@@ -58,6 +65,13 @@ public:
 									vk::CompareOp compareOp = vk::CompareOp::eNever);
 
 	vk::Sampler acquireImageSampler(vk::SamplerCreateInfo ci);
+	
+
+	/**@ return nullptr means "can't find"**/
+	vk::Sampler acquireImageSampler(int handle);
+
+	/**@ return -1 means "can't find"**/
+	int findImageSamplerHandle(vk::Sampler sampler);
 
 
 	static std::shared_ptr<VulkanTexture> create(

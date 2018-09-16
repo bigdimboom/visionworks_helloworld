@@ -110,6 +110,8 @@ int main(int argc, const char** argv)
 																		 vk::Filter::eLinear,
 																		 vk::SamplerAddressMode::eMirroredRepeat);
 
+	auto viewIndexTest = texture->acquireImageView(texture->findImageViewHandle(imageview));
+
 	texture = nullptr;
 	buffer = nullptr;
 	context = nullptr;
