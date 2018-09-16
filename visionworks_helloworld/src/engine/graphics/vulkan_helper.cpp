@@ -227,6 +227,16 @@ vk::CommandPool VulkanHelper::createCommandPool(const vk::Device & logicalDevice
 	return logicalDevice.createCommandPool(cmdpoolInfo);
 }
 
+std::vector<vk::CommandBuffer> VulkanHelper::allocateCommandBuffers(const vk::Device & logicalDevice, 
+																	const vk::CommandPool & cmdPool, 
+																	vk::CommandBufferLevel & level, 
+																	uint32_t count)
+{
+	assert(logicalDevice && cmdPool);
+	vk::CommandBufferAllocateInfo allocInfo(cmdPool, level, count);
+	return logicalDevice.allocateCommandBuffers(allocInfo);
+}
+
 bool VulkanHelper::isDepthFormat(const vk::Format & format)
 {
 	static std::vector<vk::Format> formats =

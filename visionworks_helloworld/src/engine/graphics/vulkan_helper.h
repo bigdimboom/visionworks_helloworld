@@ -34,6 +34,13 @@ public:
 	/**create command pool**/
 	static vk::CommandPool createCommandPool(const vk::Device& logicalDevice, uint32_t queueFamilyIndex, vk::CommandPoolCreateFlags createFlags = vk::CommandPoolCreateFlagBits::eResetCommandBuffer);
 
+	/*allocate command buffers*/
+	static std::vector<vk::CommandBuffer> allocateCommandBuffers(const vk::Device& logicalDevice,
+																 const vk::CommandPool& cmdPool,
+																 vk::CommandBufferLevel& level,
+																 uint32_t count);
+
+
 	/**test if the format is a depth format**/
 	static bool isDepthFormat(const vk::Format& format);
 
