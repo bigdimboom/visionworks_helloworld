@@ -1,49 +1,85 @@
 #include "graphics_app.h"
 #include <SDL2/SDL.h>
 
+#include "../graphics/vulkan_buffer.h"
+#include "../graphics/vulkan_texture.h"
+
+
 namespace app
 {
 
 
-GraphicApp::GraphicApp()
-	: AppBase()
-	, d_dispath(std::make_shared<se::dispatcher>())
+VulkanGraphicsAppBase::VulkanGraphicsAppBase()
 {
 }
 
-GraphicApp::GraphicApp(int argc, const char ** argv)
+VulkanGraphicsAppBase::VulkanGraphicsAppBase(int argc, const char ** argv)
 	: AppBase(argc, argv)
 	, d_dispath(std::make_shared<se::dispatcher>())
 {
 }
 
-GraphicApp::~GraphicApp()
+VulkanGraphicsAppBase::~VulkanGraphicsAppBase()
 {
 }
 
-int GraphicApp::exec()
+int VulkanGraphicsAppBase::exec()
 {
-	if (SDL_Init(SDL_INIT_VIDEO) != 0)
+	if (!graphics::VulkanContext::initialize())
 	{
-		SDL_Log("Unable to initialize SDL: %s", SDL_GetError());
 		return EXIT_FAILURE;
 	}
 
+	SDL_Event ev;
+	d_dispath->add_event<SDL_Event>();
 
+	auto window = graphics::VulkanContext::createWindow(WINDOW_DEFAULT_TITLE, WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT);
 
-	SDL_Quit();
+	d_context = graphics::VulkanContext::create(window);
 
-	return 0;
+	d_isRunning = init();
+
+	while (d_isRunning)
+	{
+		while (SDL_PollEvent(&ev))
+		{
+			d_dispath->trigger(ev);
+
+			if (ev.type == SDL_QUIT)
+			{
+				d_isRunning = false;
+				break;
+			}
+		}
+
+		update();
+		render();
+	}
+
+	vk::Device(*d_context->device).waitIdle();
+
+	cleanup();
+	d_dispath->cleanup();
+
+	graphics::VulkanContext::shutdown();
+
+	return EXIT_SUCCESS;
 }
 
-void GraphicApp::quitApp()
+void VulkanGraphicsAppBase::quitApp()
 {
 	d_isRunning = false;
 }
 
-std::shared_ptr<se::dispatcher> GraphicApp::dispatcher()
+std::shared_ptr<graphics::VulkanContext> VulkanGraphicsAppBase::vulkanContext()
 {
-	return std::shared_ptr<se::dispatcher>();
+	return d_context;
 }
+
+std::shared_ptr<se::dispatcher> VulkanGraphicsAppBase::dispatcher()
+{
+	return d_dispath;
+}
+
 
 } // end namespace app

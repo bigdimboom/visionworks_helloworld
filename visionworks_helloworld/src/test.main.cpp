@@ -55,70 +55,50 @@
 //};
 
 //#include <ghost_sdi/Sender/DeckSender.hpp>
-#include <iostream>
-
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_vulkan.h>
-#include <vulkan/vulkan.hpp>
-
-#include <glm/glm.hpp>
-#include <glm/gtx/string_cast.hpp>
-
-#include <vector>
-
-#include "engine/graphics/vulkan_context.h"
-#include "engine/graphics/vulkan_buffer.h"
-#include "engine/graphics/vulkan_texture.h"
+#include "test/hello_vulkan_test.h"
 
 
 int main(int argc, const char** argv)
 {
-	//return AppTest(argc, argv).exec();
-	//using namespace ghost::sdi;
-	//ghost::sdi::DeckSender obj(0, DisplayMode::FHD2997P, ghost::media::ImageFormat::CBYCRY_10_BT709);
 
-	//glm::mat4 data(1.0);
-	//std::cout << glm::to_string(data) << "\n";
+	//if (!graphics::VulkanContext::initialize())
+	//{
+	//	return EXIT_FAILURE;
+	//}
+	//auto context = graphics::VulkanContext::create(graphics::VulkanContext::createWindow(WINDOW_DEFAULT_TITLE, WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT));
+	//auto phsycalDeviceList = context->physicalDeviceList(context->instance);
 
-	if (!graphics::VulkanContext::initialize())
-	{
-		return EXIT_FAILURE;
-	}
+	//auto graphicsIndex = graphics::VulkanContext::getOptimalFamilyQueueIndex(phsycalDeviceList[0], vk::QueueFlagBits::eGraphics);
+	//auto transferIndex = graphics::VulkanContext::getOptimalFamilyQueueIndex(phsycalDeviceList[0], vk::QueueFlagBits::eTransfer);
+	//auto computeIndex = graphics::VulkanContext::getOptimalFamilyQueueIndex(phsycalDeviceList[0], vk::QueueFlagBits::eCompute);
 
-	auto context = graphics::VulkanContext::create(graphics::VulkanContext::createWindow(WINDOW_DEFAULT_TITLE, WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT));
-	auto phsycalDeviceList = context->physicalDeviceList(context->instance);
+	//auto buffer = graphics::VulkanBuffer::create(context->device,
+	//											 1024, vk::BufferUsageFlagBits::eVertexBuffer,
+	//											 vk::MemoryPropertyFlagBits::eHostVisible);
 
-	auto graphicsIndex = graphics::VulkanContext::getOptimalFamilyQueueIndex(phsycalDeviceList[0], vk::QueueFlagBits::eGraphics);
-	auto transferIndex = graphics::VulkanContext::getOptimalFamilyQueueIndex(phsycalDeviceList[0], vk::QueueFlagBits::eTransfer);
-	auto computeIndex = graphics::VulkanContext::getOptimalFamilyQueueIndex(phsycalDeviceList[0], vk::QueueFlagBits::eCompute);
+	//auto texture = graphics::VulkanTexture::create(context->device,
+	//											   vk::Format::eB8G8R8A8Unorm,
+	//											   vk::Extent3D(1024u, 1024u, 1u),
+	//											   vk::ImageUsageFlagBits::eColorAttachment,
+	//											   vk::MemoryPropertyFlagBits::eDeviceLocal);
 
-	auto buffer = graphics::VulkanBuffer::create(context->device,
-												 1024, vk::BufferUsageFlagBits::eVertexBuffer,
-												 vk::MemoryPropertyFlagBits::eHostVisible);
+	//vk::ImageSubresourceRange range(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
+	//auto imageview = texture->acquireImageView(vk::ImageViewType::e2D, {}, range);
+	//auto imagesampler = texture->acquireImageSampler();
 
-	auto texture = graphics::VulkanTexture::create(context->device,
-												   vk::Format::eB8G8R8A8Unorm,
-												   vk::Extent3D(1024u, 1024u, 1u),
-												   vk::ImageUsageFlagBits::eColorAttachment,
-												   vk::MemoryPropertyFlagBits::eDeviceLocal);
+	//auto renderpass_sampler = context->defaultRenderPass->acquireSampler(vk::Filter::eLinear,
+	//																	 vk::Filter::eLinear,
+	//																	 vk::SamplerAddressMode::eMirroredRepeat);
 
-	vk::ImageSubresourceRange range(vk::ImageAspectFlagBits::eColor, 0, 1, 0, 1);
-	auto imageview = texture->acquireImageView(vk::ImageViewType::e2D, {}, range);
-	auto imagesampler = texture->acquireImageSampler();
+	//auto viewIndexTest = texture->acquireImageView(texture->findImageViewHandle(imageview));
 
-	auto renderpass_sampler = context->defaultRenderPass->acquireSampler(vk::Filter::eLinear,
-																		 vk::Filter::eLinear,
-																		 vk::SamplerAddressMode::eMirroredRepeat);
+	//texture = nullptr;
+	//buffer = nullptr;
+	//context = nullptr;
 
-	auto viewIndexTest = texture->acquireImageView(texture->findImageViewHandle(imageview));
+	//graphics::VulkanContext::shutdown();
 
-	texture = nullptr;
-	buffer = nullptr;
-	context = nullptr;
-
-	graphics::VulkanContext::shutdown();
-
-	return 0;
+	return test::HelloVulkanTest(argc, argv).exec();
 }
 
 

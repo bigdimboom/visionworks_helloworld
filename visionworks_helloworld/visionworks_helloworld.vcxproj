@@ -24,6 +24,7 @@
     <ClCompile Include="src\engine\graphics\vulkan_texture.cpp" />
     <ClCompile Include="src\engine\graphics\vulkan_window.cpp" />
     <ClCompile Include="src\test.main.cpp" />
+    <ClCompile Include="src\test\hello_vulkan_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\engine\application\app_base.h" />
@@ -41,6 +42,7 @@
     <ClInclude Include="src\engine\graphics\vulkan_swapchain.h" />
     <ClInclude Include="src\engine\graphics\vulkan_texture.h" />
     <ClInclude Include="src\engine\graphics\vulkan_window.h" />
+    <ClInclude Include="src\test\hello_vulkan_test.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{89BFEB54-E85F-4E95-B24A-E7CA3719B24D}</ProjectGuid>

@@ -16,6 +16,9 @@
     <Filter Include="src\engine\graphics">
       <UniqueIdentifier>{1e20681d-2f19-4319-b00b-048adb2faaaa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\engine\test">
+      <UniqueIdentifier>{81a96971-6064-4655-a73c-a4fe0dcd9d3c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\engine\graphics\vulkan_context.cpp">
@@ -56,6 +59,9 @@
     </ClCompile>
     <ClCompile Include="src\engine\graphics\vulkan_texture.cpp">
       <Filter>src\engine\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\test\hello_vulkan_test.cpp">
+      <Filter>src\engine\test</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -103,6 +109,9 @@
     </ClInclude>
     <ClInclude Include="src\engine\graphics\vulkan_texture.h">
       <Filter>src\engine\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\test\hello_vulkan_test.h">
+      <Filter>src\engine\test</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
