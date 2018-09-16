@@ -240,7 +240,7 @@ std::vector<vk::CommandBuffer> VulkanHelper::allocateCommandBuffers(const vk::De
 vk::Semaphore VulkanHelper::createSemaphore(const vk::Device & logicalDevice)
 {
 	assert(logicalDevice);
-	return logicalDevice.createSemaphore(vk::SemaphoreCreateInfo({}));
+	return logicalDevice.createSemaphore(vk::SemaphoreCreateInfo());
 }
 
 bool VulkanHelper::isDepthFormat(const vk::Format & format)

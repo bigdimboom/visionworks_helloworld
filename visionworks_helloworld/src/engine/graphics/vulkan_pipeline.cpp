@@ -1,4 +1,4 @@
-#include "vulkan_shader.h"
+#include "vulkan_pipeline.h"
 #include "vulkan_device.h"
 #include "vulkan_helper.h"
 
@@ -44,45 +44,47 @@ std::shared_ptr<VulkanShader> VulkanShader::createWithGLSL(vk::Device logicalDev
 	return shader;
 }
 
-VulkanShaderProgram::~VulkanShaderProgram()
+
+// pipeline impl.
+VulkanPipeline::~VulkanPipeline()
 {
 	d_shaders.clear();
 }
 
-std::shared_ptr<VulkanShaderProgram> VulkanShaderProgram::create(vk::Device logicalDevice, vk::DescriptorPool descriptorPool)
+std::shared_ptr<VulkanPipeline> VulkanPipeline::create(vk::Device logicalDevice, vk::DescriptorPool descriptorPool)
 {
-	auto program = std::shared_ptr<VulkanShaderProgram>(new VulkanShaderProgram());
+	auto program = std::shared_ptr<VulkanPipeline>(new VulkanPipeline());
 	program->descriptorPool = descriptorPool;
 	program->logicalDevice = logicalDevice;
 	return program;
 }
 
-void VulkanShaderProgram::addShader(std::shared_ptr<VulkanShader> shader)
+void VulkanPipeline::addShader(std::shared_ptr<VulkanShader> shader)
 {
 	assert(logicalDevice && descriptorPool);
 	d_shaders[shader->shaderStage] = shader;
 }
 
-void VulkanShaderProgram::addShaderGLSL(const char * path, vk::ShaderStageFlagBits shaderStage)
+void VulkanPipeline::addShaderGLSL(const char * path, vk::ShaderStageFlagBits shaderStage)
 {
 	assert(logicalDevice && descriptorPool);
 	d_shaders[shaderStage] = VulkanShader::createWithGLSL(logicalDevice, path, shaderStage);
 }
 
-void VulkanShaderProgram::addShaderSPIRV(const char * path, vk::ShaderStageFlagBits shaderStage)
+void VulkanPipeline::addShaderSPIRV(const char * path, vk::ShaderStageFlagBits shaderStage)
 {
 	assert(logicalDevice && descriptorPool);
 	d_shaders[shaderStage] = VulkanShader::createWithSPIRV(logicalDevice, path, shaderStage);
 }
 
-void VulkanShaderProgram::build()
+void VulkanPipeline::build()
 {
 	assert(logicalDevice && descriptorPool);
-	
-	stages.clear();
+
+	shaderStages.clear();
 	for (const auto& elem : d_shaders)
 	{
-		stages.push_back(elem.second->pipelineShaderInfo);
+		shaderStages.push_back(elem.second->pipelineShaderInfo);
 	}
 
 	// TODO:

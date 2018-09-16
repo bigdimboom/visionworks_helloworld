@@ -63,7 +63,7 @@
     <ClCompile Include="src\test\hello_vulkan_test.cpp">
       <Filter>src\engine\test</Filter>
     </ClCompile>
-    <ClCompile Include="src\engine\graphics\vulkan_shader.cpp">
+    <ClCompile Include="src\engine\graphics\vulkan_pipeline.cpp">
       <Filter>src\engine\graphics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -116,7 +116,7 @@
     <ClInclude Include="src\test\hello_vulkan_test.h">
       <Filter>src\engine\test</Filter>
     </ClInclude>
-    <ClInclude Include="src\engine\graphics\vulkan_shader.h">
+    <ClInclude Include="src\engine\graphics\vulkan_pipeline.h">
       <Filter>src\engine\graphics</Filter>
     </ClInclude>
   </ItemGroup>

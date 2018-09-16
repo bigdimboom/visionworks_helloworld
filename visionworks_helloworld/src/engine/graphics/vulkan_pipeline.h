@@ -36,32 +36,41 @@ private:
 	void operator=(VulkanShader&&) = delete;
 };
 
-class VulkanShaderProgram
+class VulkanPipeline
 {
 public:
-	~VulkanShaderProgram();
+	~VulkanPipeline();
 
 	vk::Device logicalDevice;
 	vk::DescriptorPool descriptorPool;
-	std::vector<vk::PipelineShaderStageCreateInfo> stages;
 
-	static std::shared_ptr<VulkanShaderProgram> create(vk::Device logicalDevice, vk::DescriptorPool descriptorPool);
+	std::vector<vk::PipelineShaderStageCreateInfo> shaderStages;
+	vk::PipelineVertexInputStateCreateInfo vertexInputeInfo;
+
+	static std::shared_ptr<VulkanPipeline> create(vk::Device logicalDevice, vk::DescriptorPool descriptorPool);
 
 	void addShader(std::shared_ptr<VulkanShader> shader);
 	void addShaderGLSL(const char* shaderFilepath, vk::ShaderStageFlagBits shaderStage);
 	void addShaderSPIRV(const char* shaderFilepath, vk::ShaderStageFlagBits shaderStage);
+	
+	// TODO:
+	
+	
+	
+	
 	void build();
 
 
 private:
-	VulkanShaderProgram() {}
-	VulkanShaderProgram(const VulkanShaderProgram&) = delete;
-	VulkanShaderProgram(VulkanShaderProgram&&) = delete;
-	VulkanShaderProgram(const VulkanShaderProgram&) = delete;
-	void operator=(const VulkanShaderProgram&) = delete;
-	void operator=(VulkanShaderProgram&&) = delete;
+	VulkanPipeline() {}
+	VulkanPipeline(const VulkanPipeline&) = delete;
+	VulkanPipeline(VulkanPipeline&&) = delete;
+	void operator=(const VulkanPipeline&) = delete;
+	void operator=(VulkanPipeline&&) = delete;
 
 	std::unordered_map<vk::ShaderStageFlagBits, std::shared_ptr<VulkanShader>> d_shaders;
+
+
 };
 
 } // end namespace graphics
