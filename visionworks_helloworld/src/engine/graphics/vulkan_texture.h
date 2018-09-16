@@ -33,6 +33,7 @@ public:
 	vk::Extent3D resolution;
 	vk::ImageUsageFlags usage;
 	vk::ImageCreateFlags imageCreateInfo;
+	vk::ImageLayout layout;
 
 	vk::DeviceMemory memory;
 	vk::MemoryPropertyFlags memoryProperties;
@@ -82,7 +83,8 @@ public:
 		vk::MemoryPropertyFlags memoryProperties,
 		uint32_t mipLevels = 1, uint32_t arrayLayers = 1,
 		vk::SampleCountFlagBits sampleCountBit = vk::SampleCountFlagBits::e1,
-		vk::ImageCreateFlags imageCreateInfo = {}
+		vk::ImageCreateFlags imageCreateInfo = {},
+		vk::ImageLayout layout = vk::ImageLayout::eUndefined
 	);
 
 	/**static member functions**/

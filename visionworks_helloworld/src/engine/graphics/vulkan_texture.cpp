@@ -210,7 +210,8 @@ std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevic
 													 vk::MemoryPropertyFlags memoryProperties,
 													 uint32_t mipLevels, uint32_t arrayLayers,
 													 vk::SampleCountFlagBits sampleCountBit,
-													 vk::ImageCreateFlags imageCreateInfo)
+													 vk::ImageCreateFlags imageCreateInfo,
+													 vk::ImageLayout layout)
 {
 	assert(vk::Device(*device));
 
@@ -223,6 +224,7 @@ std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevic
 	texture->layerCount = arrayLayers;
 	texture->mipLevels = mipLevels;
 	texture->memoryProperties = memoryProperties;
+	texture->layout = layout;
 
 	vk::ImageCreateInfo imageCI(
 		imageCreateInfo,
@@ -234,9 +236,10 @@ std::shared_ptr<VulkanTexture> VulkanTexture::create(std::shared_ptr<VulkanDevic
 		sampleCountBit,
 		vk::ImageTiling::eOptimal,
 		usage,
-		vk::SharingMode::eExclusive
+		vk::SharingMode::eExclusive,
+		0, nullptr,
+		texture->layout
 	);
-	imageCI.setInitialLayout(vk::ImageLayout::eUndefined);
 
 	texture->image = vk::Device(*texture->device).createImage(imageCI);
 	assert(texture->image);
