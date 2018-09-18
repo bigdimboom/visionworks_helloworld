@@ -1,6 +1,7 @@
 #include "vulkan_pipeline.h"
 #include "vulkan_device.h"
 #include "vulkan_helper.h"
+#include "vulkan_descriptor_set.h"
 #include <iostream>
 
 namespace graphics
@@ -15,8 +16,8 @@ VulkanShader::~VulkanShader()
 	}
 }
 
-std::shared_ptr<VulkanShader> VulkanShader::createWithSPIRV(vk::Device logicalDevice, 
-															const char * SPIRVFilePath, 
+std::shared_ptr<VulkanShader> VulkanShader::createWithSPIRV(vk::Device logicalDevice,
+															const char * SPIRVFilePath,
 															vk::ShaderStageFlagBits stage)
 {
 	auto shader = std::shared_ptr<VulkanShader>(new VulkanShader());
@@ -30,8 +31,8 @@ std::shared_ptr<VulkanShader> VulkanShader::createWithSPIRV(vk::Device logicalDe
 	return shader;
 }
 
-std::shared_ptr<VulkanShader> VulkanShader::createWithGLSL(vk::Device logicalDevice, 
-														   const char * GLSLFilePath, 
+std::shared_ptr<VulkanShader> VulkanShader::createWithGLSL(vk::Device logicalDevice,
+														   const char * GLSLFilePath,
 														   vk::ShaderStageFlagBits stage)
 {
 	auto shader = std::shared_ptr<VulkanShader>(new VulkanShader());
@@ -47,56 +48,71 @@ std::shared_ptr<VulkanShader> VulkanShader::createWithGLSL(vk::Device logicalDev
 
 
 // pipeline impl.
-VulkanPipeline::~VulkanPipeline()
+VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
 {
 	d_shaders.clear();
+
+	if (layout)
+	{
+		assert(logicalDevice);
+		logicalDevice.destroyPipelineLayout(layout);
+	}
+
+	if (pipeline)
+	{
+		assert(logicalDevice);
+		logicalDevice.destroyPipeline(pipeline);
+		pipeline = nullptr;
+	}
 }
 
-std::shared_ptr<VulkanPipeline> VulkanPipeline::create(vk::Device logicalDevice, vk::DescriptorPool descriptorPool)
+std::shared_ptr<VulkanGraphicsPipeline> VulkanGraphicsPipeline::create(vk::Device logicalDevice, vk::RenderPass renderpass)
 {
-	auto program = std::shared_ptr<VulkanPipeline>(new VulkanPipeline());
-	program->descriptorPool = descriptorPool;
+	assert(logicalDevice && renderpass);
+
+	auto program = std::shared_ptr<VulkanGraphicsPipeline>(new VulkanGraphicsPipeline());
 	program->logicalDevice = logicalDevice;
-	program->multiSampleInfo = vk::PipelineMultisampleStateCreateInfo(
-		vk::PipelineMultisampleStateCreateFlags(),
-		vk::SampleCountFlagBits::e1,
-		VK_FALSE,
-		1.0f,
-		nullptr,
-		VK_FALSE,
-		VK_FALSE);
+	program->renderpass = renderpass;
+
+	// TODO: set default viewport
+	// TODO: tessellationState
+	program->setRasterizationState();
+	program->setDefaultMultisampleState();
+	program->setColorBlendState();
+	program->setDepthAndStencilState(true, true, vk::CompareOp::eLess);
+	program->useDefaultDynamicStates();
 
 	return program;
 }
 
-void VulkanPipeline::addShader(std::shared_ptr<VulkanShader> shader)
+void VulkanGraphicsPipeline::addShader(std::shared_ptr<VulkanShader> shader)
 {
-	assert(logicalDevice && descriptorPool);
+	assert(logicalDevice);
 	d_shaders[shader->shaderStage] = shader;
 }
 
-void VulkanPipeline::addShaderGLSL(const char * path, vk::ShaderStageFlagBits shaderStage)
+void VulkanGraphicsPipeline::addShaderGLSL(const char * path, vk::ShaderStageFlagBits shaderStage)
 {
-	assert(logicalDevice && descriptorPool);
+	assert(logicalDevice);
 	d_shaders[shaderStage] = VulkanShader::createWithGLSL(logicalDevice, path, shaderStage);
 }
 
-void VulkanPipeline::addShaderSPIRV(const char * path, vk::ShaderStageFlagBits shaderStage)
+void VulkanGraphicsPipeline::addShaderSPIRV(const char * path, vk::ShaderStageFlagBits shaderStage)
 {
-	assert(logicalDevice && descriptorPool);
+	assert(logicalDevice);
 	d_shaders[shaderStage] = VulkanShader::createWithSPIRV(logicalDevice, path, shaderStage);
 }
 
-void VulkanPipeline::addVertexInputBinding(const vk::VertexInputBindingDescription & binding)
+void VulkanGraphicsPipeline::addVertexInputBinding(const vk::VertexInputBindingDescription & binding)
 {
-	assert(logicalDevice && descriptorPool);
+	assert(logicalDevice);
 	d_vertexInputStates[binding.binding].binding = binding;
 }
 
-void VulkanPipeline::setVertexInputAttrib(const vk::VertexInputAttributeDescription & inputVertexAttrib)
+void VulkanGraphicsPipeline::setVertexInputAttrib(const vk::VertexInputAttributeDescription & inputVertexAttrib)
 {
-	assert(logicalDevice && descriptorPool);
-	
+	assert(logicalDevice);
+
 	if (d_vertexInputStates.count(inputVertexAttrib.binding) == 0)
 	{
 		std::cerr << "warning: input vertex state binding is not set.\n";
@@ -104,49 +120,165 @@ void VulkanPipeline::setVertexInputAttrib(const vk::VertexInputAttributeDescript
 	d_vertexInputStates[inputVertexAttrib.binding].attributes.push_back(inputVertexAttrib);
 }
 
-void VulkanPipeline::specifyInputAssemblyState(vk::PrimitiveTopology topology, bool primitive_restart_enable)
+void VulkanGraphicsPipeline::setInputAssemblyState(vk::PrimitiveTopology topology, bool primitive_restart_enable)
 {
-	assert(logicalDevice && descriptorPool);
+	assert(logicalDevice);
 	inputAssemblyStateInfo.setTopology(topology);
 	inputAssemblyStateInfo.setPrimitiveRestartEnable(primitive_restart_enable);
 }
 
-void VulkanPipeline::addViewport(const vk::Viewport & viewport)
+void VulkanGraphicsPipeline::addViewport(const vk::Viewport & viewport)
 {
-	assert(logicalDevice && descriptorPool);
+	assert(logicalDevice);
 	d_viewportInfoData.viewports.push_back(viewport);
 }
 
-void VulkanPipeline::addScissor(const vk::Rect2D & scissors)
+void VulkanGraphicsPipeline::addScissor(const vk::Rect2D & scissors)
 {
-	assert(logicalDevice && descriptorPool);
+	assert(logicalDevice);
 	d_viewportInfoData.scissors.push_back(scissors);
 }
 
-void VulkanPipeline::specifyViewportAndScissorTestState(const ViewportInfo & info)
+void VulkanGraphicsPipeline::setViewportAndScissorTestState(const ViewportInfo & info)
 {
-	assert(logicalDevice && descriptorPool);
+	assert(logicalDevice);
 	d_viewportInfoData = info;
 }
 
-void VulkanPipeline::specifyMultisampleState(vk::SampleCountFlagBits sample_count, 
-											 bool per_sample_shading_enable, 
-											 float min_sample_shading,
-											 const vk::SampleMask * sample_masks, 
-											 bool alpha_to_coverage_enable, bool alpha_to_one_enable)
+void VulkanGraphicsPipeline::setRasterizationState(bool clampDepthEnabled,
+												   bool rasterDiscardEnabled,
+												   vk::PolygonMode polyMode,
+												   vk::CullModeFlags culling,
+												   vk::FrontFace frontFace,
+												   bool depthBiasEnabled,
+												   float depth_bias_constant_factor,
+												   float depth_bias_clamp,
+												   float depth_bias_slope_factor,
+												   float line_width)
 {
-	assert(logicalDevice && descriptorPool);
-	multiSampleInfo.setAlphaToCoverageEnable(alpha_to_coverage_enable);
-	multiSampleInfo.setAlphaToOneEnable(alpha_to_one_enable);
-	multiSampleInfo.setMinSampleShading(min_sample_shading);
-	multiSampleInfo.setPSampleMask(sample_masks);
-	multiSampleInfo.setRasterizationSamples(sample_count);
-	multiSampleInfo.setSampleShadingEnable(per_sample_shading_enable);
+	assert(logicalDevice);
+	rasterInfo = vk::PipelineRasterizationStateCreateInfo(
+		vk::PipelineRasterizationStateCreateFlags(),
+		clampDepthEnabled, rasterDiscardEnabled,
+		polyMode, culling, frontFace,
+		depthBiasEnabled, depth_bias_constant_factor,
+		depth_bias_clamp, depth_bias_slope_factor,
+		line_width
+	);
 }
 
-void VulkanPipeline::build()
+void VulkanGraphicsPipeline::setDefaultMultisampleState()
 {
-	assert(logicalDevice && descriptorPool);
+	assert(logicalDevice);
+	multiSampleInfo = vk::PipelineMultisampleStateCreateInfo(
+		vk::PipelineMultisampleStateCreateFlags(),
+		vk::SampleCountFlagBits::e1,
+		VK_FALSE,
+		1.0f,
+		nullptr,
+		VK_FALSE,
+		VK_FALSE);
+}
+
+void VulkanGraphicsPipeline::setColorBlendState(bool logicOpEnabled, vk::LogicOp logicOp,
+												const std::vector<vk::PipelineColorBlendAttachmentState>& attachments,
+												const std::array<float, 4>& blendConstants)
+{
+	assert(logicalDevice);
+
+	d_blendAttachments = attachments;
+
+	if (d_blendAttachments.empty())
+	{
+		std::cout << "no attachments specified...use default settings.\n";
+
+		vk::PipelineColorBlendAttachmentState pipeColorBlendAttachment(VK_FALSE);
+
+
+		pipeColorBlendAttachment.setColorWriteMask(vk::ColorComponentFlagBits::eR |
+												   vk::ColorComponentFlagBits::eG |
+												   vk::ColorComponentFlagBits::eB |
+												   vk::ColorComponentFlagBits::eA);
+
+		pipeColorBlendAttachment.setSrcColorBlendFactor(vk::BlendFactor::eOne);
+		pipeColorBlendAttachment.setDstColorBlendFactor(vk::BlendFactor::eZero);
+		pipeColorBlendAttachment.setColorBlendOp(vk::BlendOp::eAdd);
+		pipeColorBlendAttachment.setSrcAlphaBlendFactor(vk::BlendFactor::eOne);
+		pipeColorBlendAttachment.setDstAlphaBlendFactor(vk::BlendFactor::eZero);
+		pipeColorBlendAttachment.setAlphaBlendOp(vk::BlendOp::eAdd);
+
+		d_blendAttachments.push_back(pipeColorBlendAttachment);
+	}
+
+	colorBlendStateInfo = vk::PipelineColorBlendStateCreateInfo(
+		vk::PipelineColorBlendStateCreateFlags(), logicOpEnabled, logicOp,
+		(uint32_t)d_blendAttachments.size(), d_blendAttachments.data(),
+		blendConstants
+	);
+}
+
+void VulkanGraphicsPipeline::useDefaultDynamicStates()
+{
+	assert(logicalDevice);
+	d_dynamicStates = {
+		vk::DynamicState::eViewport,
+		vk::DynamicState::eScissor,
+		vk::DynamicState::eLineWidth
+	};
+
+	dynamicStateinfo.setDynamicStateCount((uint32_t)d_dynamicStates.size());
+	dynamicStateinfo.setPDynamicStates(d_dynamicStates.data());
+}
+
+void VulkanGraphicsPipeline::setDynamicStates(const std::vector<vk::DynamicState>& dynamicStates)
+{
+	assert(logicalDevice);
+	d_dynamicStates = dynamicStates;
+}
+
+void VulkanGraphicsPipeline::clearAllDynamicStates()
+{
+	assert(logicalDevice);
+	d_dynamicStates.clear();
+	dynamicStateinfo.setDynamicStateCount(0);
+	dynamicStateinfo.setPDynamicStates(nullptr);
+}
+
+void VulkanGraphicsPipeline::addDescriptorSet(std::shared_ptr<VulkanDescriptorSet> descriptorSet)
+{
+	assert(logicalDevice && descriptorSet && logicalDevice == descriptorSet->logicalDevice);
+	descriptorSetLayouts.push_back(descriptorSet->layout);
+}
+
+void VulkanGraphicsPipeline::clearAllDescriptorSets()
+{
+	assert(logicalDevice);
+	descriptorSetLayouts.clear();
+}
+
+void VulkanGraphicsPipeline::setDepthAndStencilState(bool depthTestEnabled,
+													 bool depthWriteEnabled,
+													 vk::CompareOp depthCompareOp,
+													 bool depthBoundsTestEnabled,
+													 float minDepthBounds,
+													 float maxDepthBounds,
+													 bool stencilTestEnabled,
+													 vk::StencilOpState frontStencilTestParams,
+													 vk::StencilOpState backStencilTestParams)
+{
+	assert(logicalDevice);
+	depthStencilStateInfo = vk::PipelineDepthStencilStateCreateInfo(
+		vk::PipelineDepthStencilStateCreateFlags(),
+		depthTestEnabled, depthWriteEnabled, depthCompareOp,
+		depthBoundsTestEnabled,
+		stencilTestEnabled, frontStencilTestParams, backStencilTestParams,
+		minDepthBounds, maxDepthBounds
+	);
+}
+
+void VulkanGraphicsPipeline::build(vk::PipelineCreateFlags ciFlags)
+{
+	assert(logicalDevice);
 
 	// shader stages
 	shaderStages.clear();
@@ -168,16 +300,37 @@ void VulkanPipeline::build()
 	vertexInputStateInfo.setVertexAttributeDescriptionCount((uint32_t)d_vertexAttributes.size());
 	vertexInputStateInfo.setPVertexAttributeDescriptions(d_vertexAttributes.data());
 
-
 	// specify view port
 	viewportInfo.setViewportCount((uint32_t)d_viewportInfoData.viewports.size());
 	viewportInfo.setScissorCount((uint32_t)d_viewportInfoData.scissors.size());
 	viewportInfo.setPScissors(d_viewportInfoData.scissors.data());
 	viewportInfo.setPViewports(d_viewportInfoData.viewports.data());
 
+#ifdef _DEBUG
 
+	// TODO: check dups in DescriptorSetLayouts
 
+#endif // _DEBUG
 
+	layout = logicalDevice.createPipelineLayout(vk::PipelineLayoutCreateInfo(
+		vk::PipelineLayoutCreateFlags(),
+		(uint32_t)descriptorSetLayouts.size(), descriptorSetLayouts.data()
+	));
+
+	auto ci = vk::GraphicsPipelineCreateInfo(
+		ciFlags, (uint32_t)shaderStages.size(), shaderStages.data(),
+		&vertexInputStateInfo, &inputAssemblyStateInfo,
+		isTessellationStateEnabled ? &tessellationStateInfo : nullptr,
+		&viewportInfo,
+		&rasterInfo,
+		&multiSampleInfo,
+		&depthStencilStateInfo,
+		&colorBlendStateInfo,
+		d_dynamicStates.empty() ? nullptr : &dynamicStateinfo,
+		layout, renderpass
+	);
+
+	pipeline = logicalDevice.createGraphicsPipeline({}, ci);
 }
 
 } // end namespace graphics

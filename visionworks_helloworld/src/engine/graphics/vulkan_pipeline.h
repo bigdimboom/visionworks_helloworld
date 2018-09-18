@@ -7,6 +7,8 @@
 namespace graphics
 {
 
+class VulkanDescriptorSet;
+
 class VulkanShader
 {
 public:
@@ -37,7 +39,6 @@ private:
 };
 
 
-
 struct VertexInput
 {
 	vk::VertexInputBindingDescription binding;
@@ -50,32 +51,58 @@ struct ViewportInfo
 	std::vector<vk::Rect2D> scissors;
 };
 
-class VulkanPipeline
+class VulkanGraphicsPipeline
 {
 public:
 
-	~VulkanPipeline();
+	~VulkanGraphicsPipeline();
 
 	vk::Device logicalDevice;
-	vk::DescriptorPool descriptorPool;
+	vk::RenderPass renderpass;
+	std::vector<vk::DescriptorSetLayout> descriptorSetLayouts;
 
 	// shader states
 	std::vector<vk::PipelineShaderStageCreateInfo> shaderStages;
 
-	// vtx states
+	// vertex binding states
 	vk::PipelineVertexInputStateCreateInfo vertexInputStateInfo;
+
+	// input assenmbly data, e.g. triangle or .....
 	vk::PipelineInputAssemblyStateCreateInfo inputAssemblyStateInfo;
 
 	// TODO: TessellationState
+	bool isTessellationStateEnabled = false;
+	vk::PipelineTessellationStateCreateInfo tessellationStateInfo;
+
+	// Depth testing
+	vk::PipelineDepthStencilStateCreateInfo depthStencilStateInfo;
 
 	// Viewport
 	vk::PipelineViewportStateCreateInfo viewportInfo;
 
+	// raster
+	vk::PipelineRasterizationStateCreateInfo rasterInfo;
+
 	// multisample
 	vk::PipelineMultisampleStateCreateInfo multiSampleInfo;
 
+	// Blend state
+	vk::PipelineColorBlendStateCreateInfo colorBlendStateInfo;
 
-	static std::shared_ptr<VulkanPipeline> create(vk::Device logicalDevice, vk::DescriptorPool descriptorPool);
+	// dynamic state
+	vk::PipelineDynamicStateCreateInfo dynamicStateinfo;
+
+	// graphics pipeline layout
+	vk::PipelineLayout layout;
+
+	// graphcis pipeline
+	vk::Pipeline pipeline;
+
+	////////////////////////////////////////////////////////////////////////////
+
+	static std::shared_ptr<VulkanGraphicsPipeline> create(vk::Device logicalDevice, vk::RenderPass renderpass);
+
+	///////////////////////////////////////////////////////////////////////////
 
 	// shader methods
 	void addShader(std::shared_ptr<VulkanShader> shader);
@@ -85,41 +112,76 @@ public:
 	// vtx methods
 	void addVertexInputBinding(const vk::VertexInputBindingDescription& binding);
 	void setVertexInputAttrib(const vk::VertexInputAttributeDescription& inputVertexAttrib);
-	void specifyInputAssemblyState(vk::PrimitiveTopology topology, bool primitive_restart_enable = false);
+	void setInputAssemblyState(vk::PrimitiveTopology topology, bool primitive_restart_enable = false);
 
 	// viewport methods
 	void addViewport(const vk::Viewport& viewport);
 	void addScissor(const vk::Rect2D& scissors);
-	void specifyViewportAndScissorTestState(const ViewportInfo& info);
+	void setViewportAndScissorTestState(const ViewportInfo& info);
+
+	// Raster states
+	void setRasterizationState(bool clampDepthEnabled = false,
+							   bool rasterDiscardEnabled = false,
+							   vk::PolygonMode polyMode = vk::PolygonMode::eFill,
+							   vk::CullModeFlags culling = vk::CullModeFlagBits::eBack,
+							   vk::FrontFace frontFace = vk::FrontFace::eCounterClockwise,
+							   bool depthBiasEnabled = false,
+							   float depth_bias_constant_factor = 0.0f,
+							   float depth_bias_clamp = 0.0f,
+							   float depth_bias_slope_factor = 0.0f,
+							   float line_width = 1.0f);
+
+	// depth and stencil state
+	void setDepthAndStencilState(bool depthTestEnabled = true,
+								 bool depthWriteEnabled = true,
+								 vk::CompareOp depthCompareOp = vk::CompareOp::eLess,
+								 bool depthBoundsTestEnabled = false,
+								 float minDepthBounds = 0.0f,
+								 float maxDepthBounds = 1.0f,
+								 bool stencilTestEnabled = false,
+								 vk::StencilOpState frontStencilTestParams = {},
+								 vk::StencilOpState backStencilTestParams = {});
 
 	// multisample
-	void specifyMultisampleState(vk::SampleCountFlagBits sample_count,
-								 bool per_sample_shading_enable,
-								 float min_sample_shading,
-								 const vk::SampleMask * sample_masks,
-								 bool alpha_to_coverage_enable,
-								 bool alpha_to_one_enable);
+	void setDefaultMultisampleState();
 
+	// blend state
+	void setColorBlendState(bool logicOpEnabled = false, vk::LogicOp logicOp = vk::LogicOp::eCopy,
+							const std::vector<vk::PipelineColorBlendAttachmentState>& attachments = {},
+							const std::array<float, 4>& blendConstants = { 0.0f, 0.0f, 0.0f, 0.0f });
 
+	// dynamic states
+	void useDefaultDynamicStates();
+	void setDynamicStates(const std::vector<vk::DynamicState>& dynamicStates);
+	void clearAllDynamicStates();
 
+	// descriptor sets
+	void addDescriptorSet(std::shared_ptr<VulkanDescriptorSet> descriptorSet);
+	void clearAllDescriptorSets();
 
-	void build();
+	void build(vk::PipelineCreateFlags ciFlags = {});
+
 
 
 private:
-	VulkanPipeline() {}
-	VulkanPipeline(const VulkanPipeline&) = delete;
-	VulkanPipeline(VulkanPipeline&&) = delete;
-	void operator=(const VulkanPipeline&) = delete;
-	void operator=(VulkanPipeline&&) = delete;
+	VulkanGraphicsPipeline() {}
+	VulkanGraphicsPipeline(const VulkanGraphicsPipeline&) = delete;
+	VulkanGraphicsPipeline(VulkanGraphicsPipeline&&) = delete;
+	void operator=(const VulkanGraphicsPipeline&) = delete;
+	void operator=(VulkanGraphicsPipeline&&) = delete;
 
+	// shader internal data 
 	std::unordered_map<vk::ShaderStageFlagBits, std::shared_ptr<VulkanShader>> d_shaders;
+	// vertex input internal data
 	std::unordered_map<uint32_t, VertexInput> d_vertexInputStates;
-
 	std::vector<vk::VertexInputBindingDescription> d_vertexBindings;
 	std::vector<vk::VertexInputAttributeDescription> d_vertexAttributes;
-
+	// viewport internal data
 	ViewportInfo d_viewportInfoData;
+	// color blend internal data
+	std::vector<vk::PipelineColorBlendAttachmentState> d_blendAttachments;
+	// enabled dynamic state
+	std::vector<vk::DynamicState> d_dynamicStates;
 };
 
 } // end namespace graphics

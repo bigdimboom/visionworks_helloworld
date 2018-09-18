@@ -17,6 +17,7 @@
     <ClCompile Include="src\engine\graphics\vulkan_buffer.cpp" />
     <ClCompile Include="src\engine\graphics\vulkan_context.cpp" />
     <ClCompile Include="src\engine\graphics\vulkan_depth_resource.cpp" />
+    <ClCompile Include="src\engine\graphics\vulkan_descriptor_set.cpp" />
     <ClCompile Include="src\engine\graphics\vulkan_device.cpp" />
     <ClCompile Include="src\engine\graphics\vulkan_helper.cpp" />
     <ClCompile Include="src\engine\graphics\vulkan_render_pass.cpp" />
@@ -37,6 +38,7 @@
     <ClInclude Include="src\engine\graphics\vulkan_buffer.h" />
     <ClInclude Include="src\engine\graphics\vulkan_context.h" />
     <ClInclude Include="src\engine\graphics\vulkan_depth_resource.h" />
+    <ClInclude Include="src\engine\graphics\vulkan_descriptor_set.h" />
     <ClInclude Include="src\engine\graphics\vulkan_device.h" />
     <ClInclude Include="src\engine\graphics\vulkan_helper.h" />
     <ClInclude Include="src\engine\graphics\vulkan_render_pass.h" />
@@ -45,6 +47,9 @@
     <ClInclude Include="src\engine\graphics\vulkan_texture.h" />
     <ClInclude Include="src\engine\graphics\vulkan_window.h" />
     <ClInclude Include="src\test\hello_vulkan_test.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="src\engine\graphics\note.txt" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{89BFEB54-E85F-4E95-B24A-E7CA3719B24D}</ProjectGuid>

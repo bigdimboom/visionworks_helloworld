@@ -66,6 +66,9 @@
     <ClCompile Include="src\engine\graphics\vulkan_pipeline.cpp">
       <Filter>src\engine\graphics</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\graphics\vulkan_descriptor_set.cpp">
+      <Filter>src\engine\graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\engine\graphics\vulkan_context.h">
@@ -119,5 +122,13 @@
     <ClInclude Include="src\engine\graphics\vulkan_pipeline.h">
       <Filter>src\engine\graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\engine\graphics\vulkan_descriptor_set.h">
+      <Filter>src\engine\graphics</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="src\engine\graphics\note.txt">
+      <Filter>src\engine\graphics</Filter>
+    </Text>
   </ItemGroup>
 </Project>
