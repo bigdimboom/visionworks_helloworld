@@ -218,10 +218,10 @@ std::shared_ptr<VulkanSwapChain> VulkanSwapChain::create(const vk::PhysicalDevic
 	return data;
 }
 
-uint32_t VulkanSwapChain::acquireNewFrame(vk::Semaphore sema)
+uint32_t VulkanSwapChain::acquireNewFrame(vk::Semaphore sema, vk::Fence fence)
 {
 	assert(logicalDevice && swapChain);
-	auto val = logicalDevice.acquireNextImageKHR(swapChain, UINT64_MAX, sema, nullptr);
+	auto val = logicalDevice.acquireNextImageKHR(swapChain, UINT64_MAX, sema, fence);
 #ifdef _DEBUG
 	VulkanHelper::check_vk_result(val.result);
 #endif // _DEBUG

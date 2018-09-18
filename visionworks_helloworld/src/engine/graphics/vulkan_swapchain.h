@@ -44,7 +44,7 @@ public:
 												   int frameCount = 3, int imageArrayLayers = 1);
 
 	// MEMBER FUNCTIONS
-	uint32_t acquireNewFrame(vk::Semaphore sema);
+	uint32_t acquireNewFrame(vk::Semaphore sema, vk::Fence fence = nullptr);
 	void queuePresent(vk::Queue queue, uint32_t imageIndex, vk::Semaphore waitSemaphore = nullptr);
 
 private:
