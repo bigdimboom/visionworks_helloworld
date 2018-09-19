@@ -122,6 +122,14 @@ bool HelloVulkanTest::init()
 	uint32_t vertex_size = sizeof(Vertex) * (uint32_t)d_mesh.vertices.size();
 	uint32_t index_size = sizeof(uint32_t) * (uint32_t)d_mesh.indices.size();
 	uint32_t stage_size = vertex_size >= index_size ? vertex_size : index_size;
+	auto transferCmdPool = vulkanContext()->device->createCmdPool(vulkanContext()->device->queueFamilyIndices.transfer);
+	auto transferCmd = vk::Device(*vulkanContext()->device).allocateCommandBuffers(
+		vk::CommandBufferAllocateInfo(transferCmdPool, vk::CommandBufferLevel::ePrimary, 1)
+	)[0];
+
+	vk::SubmitInfo submitInfo;
+	submitInfo.setCommandBufferCount(1);
+	submitInfo.setPCommandBuffers(&transferCmd);
 
 	auto stageBuff = graphics::VulkanBuffer::create(vulkanContext()->device, stage_size,
 													vk::BufferUsageFlagBits::eTransferSrc,
@@ -135,19 +143,29 @@ bool HelloVulkanTest::init()
 												vk::BufferUsageFlagBits::eTransferDst,
 												vk::MemoryPropertyFlagBits::eDeviceLocal);
 
+	transferCmd.begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
+	stageBuff->copyTo(transferCmd, d_mesh.vbo, vk::BufferCopy(0,0, vertex_size));
+	transferCmd.end();
+	vulkanContext()->device->queue(vulkanContext()->device->queueFamilyIndices.transfer).submit(submitInfo, nullptr);
+	vk::Device(*vulkanContext()->device).waitIdle();
+
+
 	stageBuff->upload(d_mesh.indices.data(), index_size);
 	d_mesh.ebo = graphics::VulkanBuffer::create(vulkanContext()->device, index_size,
 												vk::BufferUsageFlagBits::eIndexBuffer |
 												vk::BufferUsageFlagBits::eTransferDst,
 												vk::MemoryPropertyFlagBits::eDeviceLocal);
 
+
+	transferCmd.begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
+	stageBuff->copyTo(transferCmd, d_mesh.ebo, vk::BufferCopy(0, 0, index_size));
+	transferCmd.end();
+	vulkanContext()->device->queue(vulkanContext()->device->queueFamilyIndices.transfer).submit(submitInfo, nullptr);
+	vk::Device(*vulkanContext()->device).waitIdle();
+
 	stageBuff = nullptr;
-
-
-
-
-
-
+	vk::Device(*vulkanContext()->device).freeCommandBuffers(transferCmdPool, transferCmd);
+	vk::Device(*vulkanContext()->device).destroyCommandPool(transferCmdPool);
 
 	return true;
 }

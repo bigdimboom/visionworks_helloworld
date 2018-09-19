@@ -118,6 +118,22 @@ bool VulkanBuffer::isHostVisible() const
 	return false;
 }
 
+bool VulkanBuffer::copyTo(vk::CommandBuffer command, 
+						  std::shared_ptr<VulkanBuffer> dest, 
+						  const vk::BufferCopy & region)
+{
+	assert(device);
+	if ((dest->usageFlags & vk::BufferUsageFlagBits::eTransferDst) &&
+		(dest->usageFlags & vk::BufferUsageFlagBits::eTransferDst))
+	{
+		if(region.size)
+		command.copyBuffer(buffer,dest->buffer, region);
+		return true;
+	}
+
+	return false;
+}
+
 /*STATIC MEMBER FUNCTIONS*/
 void VulkanBuffer::setBufferMemoryBarrier(vk::CommandBuffer commandBuffer, 
 										  vk::PipelineStageFlags srcMask, 

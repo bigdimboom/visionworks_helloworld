@@ -106,6 +106,11 @@ public:
 	bool isHostVisible() const;
 
 
+	/**Copy Data to Other Buffer**/
+	bool copyTo(vk::CommandBuffer command, std::shared_ptr<VulkanBuffer> other, const vk::BufferCopy& region);
+
+
+
 	/*STATIC MEMBER FUNCTIONS*/
 	static void setBufferMemoryBarrier(vk::CommandBuffer commandBuffer,
 									   vk::PipelineStageFlags sourceStage,
