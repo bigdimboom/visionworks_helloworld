@@ -168,7 +168,7 @@ bool HelloVulkanTest::init()
 	vk::Device(*vulkanContext()->device).destroyCommandPool(transferCmdPool);
 
 	d_pipeline = graphics::VulkanGraphicsPipeline::create(vk::Device(*vulkanContext()->device), vk::RenderPass(*vulkanContext()->defaultRenderPass));
-	d_pipeline->addViewport(vk::Viewport(0, 0, vulkanContext()->swapChain->actualExtent.width, vulkanContext()->swapChain->actualExtent.height));
+	d_pipeline->addViewport(vk::Viewport(0.0f, 0.0f, (float)vulkanContext()->swapChain->actualExtent.width, (float)vulkanContext()->swapChain->actualExtent.height));
 	d_pipeline->addVertexInputBinding(vk::VertexInputBindingDescription(0, sizeof(Vertex), vk::VertexInputRate::eVertex));
 	d_pipeline->setVertexInputAttrib(vk::VertexInputAttributeDescription(0, 0, vk::Format::eR32G32B32Sfloat, 0));
 	d_pipeline->setVertexInputAttrib(vk::VertexInputAttributeDescription(1, 0, vk::Format::eR32G32B32A32Sfloat, sizeof(glm::vec3)));
@@ -180,6 +180,10 @@ bool HelloVulkanTest::init()
 
 	// TODO:
 	d_pipeline->build({});
+
+	d_freeCam = std::make_shared<cam::FreeCamera>(vulkanContext()->swapChain->actualExtent.width,
+												  vulkanContext()->swapChain->actualExtent.height,
+												  cam::CameraType::Orthogonal);
 
 	return true;
 }
@@ -200,6 +204,27 @@ void HelloVulkanTest::cleanup()
 
 void HelloVulkanTest::cameraMotion(float xpos, float ypos, bool & firstMouse)
 {
+	float WINDOW_WIDTH = (float)vulkanContext()->swapChain->actualExtent.width;
+	float WINDOW_HEIGHT = (float)vulkanContext()->swapChain->actualExtent.height;
+
+	static float lastX = WINDOW_WIDTH / 2;
+	static float lastY = WINDOW_HEIGHT / 2;
+
+	if (firstMouse)
+	{
+		lastX = xpos;
+		lastY = ypos;
+		firstMouse = false;
+	}
+
+	float xoffset = xpos - lastX;
+	float yoffset = lastY - ypos;  // Reversed since y-coordinates go from bottom to left
+
+	lastX = xpos;
+	lastY = ypos;
+
+	d_freeCam->pitch(-yoffset * 0.008f);
+	d_freeCam->yaw(xoffset * 0.008f);
 }
 
 
