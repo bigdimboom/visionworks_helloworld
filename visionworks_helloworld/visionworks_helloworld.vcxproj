@@ -13,6 +13,8 @@
   <ItemGroup>
     <ClCompile Include="src\engine\application\app_base.cpp" />
     <ClCompile Include="src\engine\application\graphics_app.cpp" />
+    <ClCompile Include="src\engine\camera\camera_base.cpp" />
+    <ClCompile Include="src\engine\camera\free_camera.cpp" />
     <ClCompile Include="src\engine\event\dispatcher.cpp" />
     <ClCompile Include="src\engine\graphics\vulkan_buffer.cpp" />
     <ClCompile Include="src\engine\graphics\vulkan_context.cpp" />
@@ -31,6 +33,8 @@
   <ItemGroup>
     <ClInclude Include="src\engine\application\app_base.h" />
     <ClInclude Include="src\engine\application\graphics_app.h" />
+    <ClInclude Include="src\engine\camera\camera_base.h" />
+    <ClInclude Include="src\engine\camera\free_camera.h" />
     <ClInclude Include="src\engine\event\dispatcher.h" />
     <ClInclude Include="src\engine\event\event.h" />
     <ClInclude Include="src\engine\event\safe_event.h" />
