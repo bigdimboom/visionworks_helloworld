@@ -44,6 +44,9 @@ public:
 	std::vector<vk::SubpassDependency> denpendencies;
 	vk::Framebuffer frameBuffer;
 
+	/**  @brief Typecast to VkDevice */
+	operator vk::RenderPass() { return renderpass; };
+
 	static std::shared_ptr<VulkanRenderPass> create(
 		std::shared_ptr<VulkanSwapChain> swapChain,
 		std::shared_ptr<VulkanDepthResource> depth

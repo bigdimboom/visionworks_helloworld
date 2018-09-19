@@ -167,6 +167,20 @@ bool HelloVulkanTest::init()
 	vk::Device(*vulkanContext()->device).freeCommandBuffers(transferCmdPool, transferCmd);
 	vk::Device(*vulkanContext()->device).destroyCommandPool(transferCmdPool);
 
+	d_pipeline = graphics::VulkanGraphicsPipeline::create(vk::Device(*vulkanContext()->device), vk::RenderPass(*vulkanContext()->defaultRenderPass));
+	d_pipeline->addViewport(vk::Viewport(0, 0, vulkanContext()->swapChain->actualExtent.width, vulkanContext()->swapChain->actualExtent.height));
+	d_pipeline->addVertexInputBinding(vk::VertexInputBindingDescription(0, sizeof(Vertex), vk::VertexInputRate::eVertex));
+	d_pipeline->setVertexInputAttrib(vk::VertexInputAttributeDescription(0, 0, vk::Format::eR32G32B32Sfloat, 0));
+	d_pipeline->setVertexInputAttrib(vk::VertexInputAttributeDescription(1, 0, vk::Format::eR32G32B32A32Sfloat, sizeof(glm::vec3)));
+	d_pipeline->setInputAssemblyState(vk::PrimitiveTopology::eTriangleList);
+	
+	// TODO: testing shader
+	d_pipeline->addShader(graphics::VulkanShader::createWithSPIRV(vk::Device(*vulkanContext()->device), "assets/shaders/cube.vert", vk::ShaderStageFlagBits::eVertex));
+	d_pipeline->addShader(graphics::VulkanShader::createWithSPIRV(vk::Device(*vulkanContext()->device), "assets/shaders/cube.frag", vk::ShaderStageFlagBits::eFragment));
+
+	// TODO:
+	d_pipeline->build();
+
 	return true;
 }
 

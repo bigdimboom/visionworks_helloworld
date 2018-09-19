@@ -51,10 +51,9 @@ private:
 		glm::mat4 proj = glm::mat4(1.0f);
 	};
 
-	std::vector<vk::CommandBuffer> d_commands;
-
 	std::shared_ptr<cam::FreeCamera> d_freeCam;
 
+	std::shared_ptr<graphics::VulkanGraphicsPipeline> d_pipeline;
 
 	void cameraMotion(float xpos, float ypos, bool& firstMouse);
 };

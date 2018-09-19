@@ -314,7 +314,7 @@ void VulkanGraphicsPipeline::build(vk::PipelineCreateFlags ciFlags)
 
 	layout = logicalDevice.createPipelineLayout(vk::PipelineLayoutCreateInfo(
 		vk::PipelineLayoutCreateFlags(),
-		(uint32_t)descriptorSetLayouts.size(), descriptorSetLayouts.data()
+		(uint32_t)descriptorSetLayouts.size(), descriptorSetLayouts.empty() ? nullptr : descriptorSetLayouts.data()
 	));
 
 	auto ci = vk::GraphicsPipelineCreateInfo(
