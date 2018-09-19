@@ -179,7 +179,7 @@ bool HelloVulkanTest::init()
 	d_pipeline->addShader(graphics::VulkanShader::createWithSPIRV(vk::Device(*vulkanContext()->device), "assets/shaders/cube.frag", vk::ShaderStageFlagBits::eFragment));
 
 	// TODO:
-	d_pipeline->build();
+	d_pipeline->build({});
 
 	return true;
 }
