@@ -42,7 +42,8 @@ public:
 	std::vector<vk::AttachmentDescription> attachments;
 	std::vector<vk::SubpassDescription> subpasses;
 	std::vector<vk::SubpassDependency> denpendencies;
-	vk::Framebuffer frameBuffer;
+	std::vector<vk::Framebuffer> frameBuffers;
+	std::array<vk::ClearValue, 2> clearValues;
 
 	/**  @brief Typecast to VkDevice */
 	operator vk::RenderPass() { return renderpass; };
@@ -64,6 +65,11 @@ public:
 	*/
 	vk::Sampler acquireSampler(vk::Filter magFilter, vk::Filter minFilter, vk::SamplerAddressMode adressMode);
 
+
+	/*
+	* set screen color
+	*/
+	void clearAll(float r, float g, float b, float a);
 
 private:
 	VulkanRenderPass() {}

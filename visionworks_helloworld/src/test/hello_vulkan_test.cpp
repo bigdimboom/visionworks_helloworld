@@ -15,8 +15,7 @@ HelloVulkanTest::~HelloVulkanTest()
 
 bool HelloVulkanTest::init()
 {
-	dispatcher()->listen_any([this](const se::any_event& ev)
-	{
+	dispatcher()->listen_any([this](const se::any_event& ev) {
 		static auto startTime = std::chrono::high_resolution_clock::now();
 		auto currentTime = std::chrono::high_resolution_clock::now();
 		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
@@ -96,6 +95,8 @@ bool HelloVulkanTest::init()
 	{ { -1.0,  1.0, -1.0 },{ 1.0, 1.0, 1.0, 1.0 } }
 	};
 
+	std::for_each(d_mesh.vertices.begin(), d_mesh.vertices.end(), [](Vertex& v) {   v.position /= 2.0; });
+
 	d_mesh.indices =
 	{
 		// front
@@ -144,7 +145,7 @@ bool HelloVulkanTest::init()
 												vk::MemoryPropertyFlagBits::eDeviceLocal);
 
 	transferCmd.begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eOneTimeSubmit));
-	stageBuff->copyTo(transferCmd, d_mesh.vbo, vk::BufferCopy(0,0, vertex_size));
+	stageBuff->copyTo(transferCmd, d_mesh.vbo, vk::BufferCopy(0, 0, vertex_size));
 	transferCmd.end();
 	vulkanContext()->device->queue(vulkanContext()->device->queueFamilyIndices.transfer).submit(submitInfo, nullptr);
 	vk::Device(*vulkanContext()->device).waitIdle();
@@ -167,16 +168,20 @@ bool HelloVulkanTest::init()
 	vk::Device(*vulkanContext()->device).freeCommandBuffers(transferCmdPool, transferCmd);
 	vk::Device(*vulkanContext()->device).destroyCommandPool(transferCmdPool);
 
-	d_pipeline = graphics::VulkanGraphicsPipeline::create(vk::Device(*vulkanContext()->device), vk::RenderPass(*vulkanContext()->defaultRenderPass));
-	d_pipeline->addViewport(vk::Viewport(0.0f, 0.0f, (float)vulkanContext()->swapChain->actualExtent.width, (float)vulkanContext()->swapChain->actualExtent.height));
+	d_pipeline = graphics::VulkanGraphicsPipeline::create(vulkanContext()->defaultRenderPass);
+
+	auto res = vulkanContext()->swapChain->actualExtent;
+	d_pipeline->addViewport(vk::Viewport(0.0f, 0.0f, (float)res.width, (float)res.height));
+	d_pipeline->addScissor(vk::Rect2D({}, res));
+
 	d_pipeline->addVertexInputBinding(vk::VertexInputBindingDescription(0, sizeof(Vertex), vk::VertexInputRate::eVertex));
 	d_pipeline->setVertexInputAttrib(vk::VertexInputAttributeDescription(0, 0, vk::Format::eR32G32B32Sfloat, 0));
 	d_pipeline->setVertexInputAttrib(vk::VertexInputAttributeDescription(1, 0, vk::Format::eR32G32B32A32Sfloat, sizeof(glm::vec3)));
 	d_pipeline->setInputAssemblyState(vk::PrimitiveTopology::eTriangleList);
-	
+
 	// TODO: testing shader
-	d_pipeline->addShader(graphics::VulkanShader::createWithSPIRV(vk::Device(*vulkanContext()->device), "assets/shaders/cube.vert", vk::ShaderStageFlagBits::eVertex));
-	d_pipeline->addShader(graphics::VulkanShader::createWithSPIRV(vk::Device(*vulkanContext()->device), "assets/shaders/cube.frag", vk::ShaderStageFlagBits::eFragment));
+	d_pipeline->addShaderSPIRV("assets/shaders/cube.vert", vk::ShaderStageFlagBits::eVertex);
+	d_pipeline->addShaderSPIRV("assets/shaders/cube.frag", vk::ShaderStageFlagBits::eFragment);
 
 	// TODO:
 	d_pipeline->build({});
@@ -184,6 +189,50 @@ bool HelloVulkanTest::init()
 	d_freeCam = std::make_shared<cam::FreeCamera>(vulkanContext()->swapChain->actualExtent.width,
 												  vulkanContext()->swapChain->actualExtent.height,
 												  cam::CameraType::Orthogonal);
+
+	d_commands = vk::Device(*vulkanContext()->device).allocateCommandBuffers(vk::CommandBufferAllocateInfo(
+		vulkanContext()->device->graphicsCmdPool,
+		vk::CommandBufferLevel::ePrimary,
+		vulkanContext()->swapChain->frameCount
+	));
+
+	d_dawQueue = vulkanContext()->device->queue(vulkanContext()->device->queueFamilyIndices.graphics);
+
+	vulkanContext()->defaultRenderPass->clearAll(1.0, 0.0, 0.0, 0.0);
+
+	for (int i = 0; i < d_commands.size(); ++i)
+	{
+		auto& command = d_commands[i];
+
+		command.begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eRenderPassContinue));
+		{
+			command.beginRenderPass(vk::RenderPassBeginInfo(vulkanContext()->defaultRenderPass->renderpass, vulkanContext()->defaultRenderPass->frameBuffers[i], vk::Rect2D({}, res),
+				(uint32_t)vulkanContext()->defaultRenderPass->clearValues.size(), vulkanContext()->defaultRenderPass->clearValues.data()),
+									vk::SubpassContents::eInline);
+			{
+				command.setViewport(0, vk::Viewport(0.0f, 0.0f, (float)res.width, (float)res.height));
+				command.setScissor(0, vk::Rect2D({}, res));
+
+				command.bindPipeline(vk::PipelineBindPoint::eGraphics, d_pipeline->pipeline);
+				vk::DeviceSize offsets[] = { 0 };
+				command.bindVertexBuffers(0, 1, &d_mesh.vbo->buffer, offsets);
+				command.bindIndexBuffer(d_mesh.ebo->buffer, 0, vk::IndexType::eUint32);
+				command.drawIndexed((uint32_t)d_mesh.indices.size(), 1, 0, 0, 0);
+			}
+			command.endRenderPass();
+		}
+		command.end();
+	}
+
+	d_fence.resize(d_commands.size());
+	d_imageAcquiringSemaphore.resize(d_commands.size());
+	d_imageRenderingSemaphore.resize(d_commands.size());
+	for (int i = 0; i < d_commands.size(); ++i)
+	{
+		d_imageAcquiringSemaphore[i] = vk::Device(*vulkanContext()->device).createSemaphore(vk::SemaphoreCreateInfo());
+		d_imageRenderingSemaphore[i] = vk::Device(*vulkanContext()->device).createSemaphore(vk::SemaphoreCreateInfo());
+		d_fence[i] = vk::Device(*vulkanContext()->device).createFence(vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled));
+	}
 
 	return true;
 }
@@ -194,12 +243,48 @@ void HelloVulkanTest::update()
 
 void HelloVulkanTest::render()
 {
+	// TODO: adding present
+	static uint32_t index = 0;
+	index = vulkanContext()->swapChain->acquireNewFrame(d_imageAcquiringSemaphore[index]);
 
+	vk::PipelineStageFlags flags = vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eAllGraphics;
+
+	vk::Device(*vulkanContext()->device).waitForFences(1, &d_fence[index], VK_TRUE, UINT64_MAX);
+	vk::Device(*vulkanContext()->device).resetFences(1, &d_fence[index]);
+
+	vk::SubmitInfo submitinfo;
+	submitinfo.setPWaitDstStageMask(&flags);
+	submitinfo.setCommandBufferCount(1);
+	submitinfo.setPCommandBuffers(&d_commands[index]);
+
+	submitinfo.setWaitSemaphoreCount(1);
+	submitinfo.setPWaitSemaphores(&d_imageAcquiringSemaphore[index]);
+	submitinfo.setSignalSemaphoreCount(1);
+	submitinfo.setPSignalSemaphores(&d_imageRenderingSemaphore[index]);
+
+	d_dawQueue.submit(submitinfo, d_fence[index]);
+
+	vulkanContext()->swapChain->queuePresent(d_dawQueue, index, d_imageRenderingSemaphore[index]);
+
+	index = ((index + 1) % d_commands.size());
 }
 
 void HelloVulkanTest::cleanup()
 {
+	//if (!d_commands.empty())
+	//{
+	//	for(const auto& cmd : d_commands)
+	//	{
+	//		vk::Device(*vulkanContext()->device).freeCommandBuffers(vulkanContext()->device->graphicsCmdPool, d_commands);
+	//	}
+	//}
 
+	for (int i = 0; i < d_commands.size(); ++i)
+	{
+		vk::Device(*vulkanContext()->device).destroySemaphore(d_imageAcquiringSemaphore[i]);
+		vk::Device(*vulkanContext()->device).destroySemaphore(d_imageRenderingSemaphore[i]);
+		vk::Device(*vulkanContext()->device).destroyFence(d_fence[i]);
+	}
 }
 
 void HelloVulkanTest::cameraMotion(float xpos, float ypos, bool & firstMouse)

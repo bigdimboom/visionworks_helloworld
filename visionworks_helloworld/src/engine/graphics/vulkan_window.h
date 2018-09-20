@@ -46,6 +46,9 @@ public:
 
 	void destory();
 
+	// DO NOT DELETE 
+	void* intenalPointer() { return d_window; }
+
 private:
 	VulkanWindow();
 

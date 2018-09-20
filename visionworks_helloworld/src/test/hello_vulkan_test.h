@@ -55,6 +55,15 @@ private:
 
 	std::shared_ptr<graphics::VulkanGraphicsPipeline> d_pipeline;
 
+	std::vector<vk::CommandBuffer> d_commands;
+
+	vk::Queue d_dawQueue;
+
+	std::vector<vk::Semaphore> d_imageAcquiringSemaphore;
+	std::vector<vk::Semaphore> d_imageRenderingSemaphore;
+	std::vector<vk::Fence> d_fence;
+
+
 	void cameraMotion(float xpos, float ypos, bool& firstMouse);
 };
 

@@ -22,6 +22,12 @@
     <Filter Include="src\engine\camera">
       <UniqueIdentifier>{fba9f85f-9f77-46d0-97dd-bf8530ae1b59}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\engine\renderer">
+      <UniqueIdentifier>{34b1dce8-3fdf-4b71-8de4-bb42e233e312}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\engine\api">
+      <UniqueIdentifier>{49420e3e-0170-4409-b994-85b4fab368be}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\engine\graphics\vulkan_context.cpp">
@@ -77,6 +83,33 @@
     </ClCompile>
     <ClCompile Include="src\engine\camera\free_camera.cpp">
       <Filter>src\engine\camera</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\renderer\gui_overlay.cpp">
+      <Filter>src\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\renderer\irenderable.cpp">
+      <Filter>src\engine\renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\api\DeckLinkAPI_i.c">
+      <Filter>src\engine\api</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\api\imgui.cpp">
+      <Filter>src\engine\api</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\api\imgui_demo.cpp">
+      <Filter>src\engine\api</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\api\imgui_draw.cpp">
+      <Filter>src\engine\api</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\api\imgui_impl_sdl.cpp">
+      <Filter>src\engine\api</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\api\imgui_impl_vulkan.cpp">
+      <Filter>src\engine\api</Filter>
+    </ClCompile>
+    <ClCompile Include="src\engine\api\imgui_widgets.cpp">
+      <Filter>src\engine\api</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -139,6 +172,39 @@
     </ClInclude>
     <ClInclude Include="src\engine\camera\free_camera.h">
       <Filter>src\engine\camera</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\renderer\gui_overlay.h">
+      <Filter>src\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\renderer\irenderable.h">
+      <Filter>src\engine\renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\api\DeckLinkAPI_h.h">
+      <Filter>src\engine\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\api\imconfig.h">
+      <Filter>src\engine\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\api\imgui.h">
+      <Filter>src\engine\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\api\imgui_impl_sdl.h">
+      <Filter>src\engine\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\api\imgui_impl_vulkan.h">
+      <Filter>src\engine\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\api\imgui_internal.h">
+      <Filter>src\engine\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\api\imstb_rectpack.h">
+      <Filter>src\engine\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\api\imstb_textedit.h">
+      <Filter>src\engine\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\api\imstb_truetype.h">
+      <Filter>src\engine\api</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

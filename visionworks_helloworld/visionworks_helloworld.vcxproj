@@ -11,6 +11,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\engine\api\DeckLinkAPI_i.c" />
+    <ClCompile Include="src\engine\api\imgui.cpp" />
+    <ClCompile Include="src\engine\api\imgui_demo.cpp" />
+    <ClCompile Include="src\engine\api\imgui_draw.cpp" />
+    <ClCompile Include="src\engine\api\imgui_impl_sdl.cpp" />
+    <ClCompile Include="src\engine\api\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="src\engine\api\imgui_widgets.cpp" />
     <ClCompile Include="src\engine\application\app_base.cpp" />
     <ClCompile Include="src\engine\application\graphics_app.cpp" />
     <ClCompile Include="src\engine\camera\camera_base.cpp" />
@@ -27,10 +34,21 @@
     <ClCompile Include="src\engine\graphics\vulkan_swapchain.cpp" />
     <ClCompile Include="src\engine\graphics\vulkan_texture.cpp" />
     <ClCompile Include="src\engine\graphics\vulkan_window.cpp" />
+    <ClCompile Include="src\engine\renderer\gui_overlay.cpp" />
+    <ClCompile Include="src\engine\renderer\irenderable.cpp" />
     <ClCompile Include="src\test.main.cpp" />
     <ClCompile Include="src\test\hello_vulkan_test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\engine\api\DeckLinkAPI_h.h" />
+    <ClInclude Include="src\engine\api\imconfig.h" />
+    <ClInclude Include="src\engine\api\imgui.h" />
+    <ClInclude Include="src\engine\api\imgui_impl_sdl.h" />
+    <ClInclude Include="src\engine\api\imgui_impl_vulkan.h" />
+    <ClInclude Include="src\engine\api\imgui_internal.h" />
+    <ClInclude Include="src\engine\api\imstb_rectpack.h" />
+    <ClInclude Include="src\engine\api\imstb_textedit.h" />
+    <ClInclude Include="src\engine\api\imstb_truetype.h" />
     <ClInclude Include="src\engine\application\app_base.h" />
     <ClInclude Include="src\engine\application\graphics_app.h" />
     <ClInclude Include="src\engine\camera\camera_base.h" />
@@ -50,6 +68,8 @@
     <ClInclude Include="src\engine\graphics\vulkan_swapchain.h" />
     <ClInclude Include="src\engine\graphics\vulkan_texture.h" />
     <ClInclude Include="src\engine\graphics\vulkan_window.h" />
+    <ClInclude Include="src\engine\renderer\gui_overlay.h" />
+    <ClInclude Include="src\engine\renderer\irenderable.h" />
     <ClInclude Include="src\test\hello_vulkan_test.h" />
   </ItemGroup>
   <ItemGroup>

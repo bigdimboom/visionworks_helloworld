@@ -30,11 +30,16 @@ VulkanRenderPass::~VulkanRenderPass()
 		renderpass = nullptr;
 	}
 
-	if (frameBuffer)
+	if (!frameBuffers.empty())
 	{
 		assert(logicalDevice);
-		logicalDevice.destroyFramebuffer(frameBuffer);
-		frameBuffer = nullptr;
+
+		for (const auto& fb : frameBuffers)
+		{
+			logicalDevice.destroyFramebuffer(fb);
+		}
+
+		frameBuffers.clear();
 	}
 
 	if (d_samplerData.sampler)
@@ -87,21 +92,15 @@ std::shared_ptr<VulkanRenderPass> VulkanRenderPass::create(std::shared_ptr<Vulka
 
 
 	vk::SubpassDescription subpass;
-	std::vector<vk::AttachmentReference> colorRef;
+	vk::AttachmentReference colorRef(0, vk::ImageLayout::eColorAttachmentOptimal);
+	vk::AttachmentReference depthRef(1, vk::ImageLayout::eDepthStencilAttachmentOptimal);
 
-	int i = 0;
-	for (; i < swapChain->frameCount; ++i)
-	{
-		rpData->attachments.push_back(attachments[AttachmentKey::COLOR]);
-		colorRef.push_back(vk::AttachmentReference(i, vk::ImageLayout::eColorAttachmentOptimal));
-	}
-
-	vk::AttachmentReference depthRef(i, vk::ImageLayout::eDepthStencilAttachmentOptimal);
+	rpData->attachments.push_back(attachments[AttachmentKey::COLOR]);
 	rpData->attachments.push_back(attachments[AttachmentKey::DEPTH]);
 
 	subpass.setPipelineBindPoint(vk::PipelineBindPoint::eGraphics);
-	subpass.setColorAttachmentCount((uint32_t)colorRef.size());
-	subpass.setPColorAttachments(colorRef.data());
+	subpass.setColorAttachmentCount(1u);
+	subpass.setPColorAttachments(&colorRef);
 	subpass.setPDepthStencilAttachment(&depthRef);
 	subpass.setInputAttachmentCount(0);
 	subpass.setPInputAttachments(nullptr);
@@ -147,16 +146,13 @@ std::shared_ptr<VulkanRenderPass> VulkanRenderPass::create(std::shared_ptr<Vulka
 
 
 	// frame buffer
-	std::vector<vk::ImageView> attachmentViews;
 	std::vector<vk::ImageSubresourceRange> imageRanges;
 
 	for (auto& elem : swapChain->buffers)
 	{
-		attachmentViews.push_back(elem.imageView);
 		imageRanges.push_back(elem.imageSubresourceRange);
+		imageRanges.push_back(depth->imageSubresourceRange);
 	}
-	attachmentViews.push_back(depth->imageView);
-	imageRanges.push_back(depth->imageSubresourceRange);
 
 	uint32_t maxLayers = 0;
 	for (auto& elem : imageRanges)
@@ -167,15 +163,21 @@ std::shared_ptr<VulkanRenderPass> VulkanRenderPass::create(std::shared_ptr<Vulka
 		}
 	}
 
-	vk::FramebufferCreateInfo fbci;
-	fbci.renderPass = rpData->renderpass;
-	fbci.attachmentCount = (uint32_t)attachmentViews.size();
-	fbci.pAttachments = attachmentViews.data();
-	fbci.width = swapChain->actualExtent.width;
-	fbci.height = swapChain->actualExtent.height;
-	fbci.layers = maxLayers;
+	for (auto& elem : swapChain->buffers)
+	{
+		std::vector<vk::ImageView> attachmentViews;
+		attachmentViews.push_back(elem.imageView);
+		attachmentViews.push_back(depth->imageView);
 
-	rpData->frameBuffer = rpData->logicalDevice.createFramebuffer(fbci);
+		vk::FramebufferCreateInfo fbci;
+		fbci.renderPass = rpData->renderpass;
+		fbci.attachmentCount = (uint32_t)attachmentViews.size();
+		fbci.pAttachments = attachmentViews.data();
+		fbci.width = swapChain->actualExtent.width;
+		fbci.height = swapChain->actualExtent.height;
+		fbci.layers = maxLayers;
+		rpData->frameBuffers.push_back(rpData->logicalDevice.createFramebuffer(fbci));
+	}
 
 	// TODO: clearValues
 
@@ -220,6 +222,11 @@ vk::Sampler VulkanRenderPass::acquireSampler(vk::Filter magFilter,
 	return d_samplerData.sampler;
 }
 
-
+void VulkanRenderPass::clearAll(float r, float g, float b, float a)
+{
+	assert(physicalDevice && logicalDevice);
+	clearValues[0].color.setFloat32({ r, g, b, a });
+	clearValues[1].setDepthStencil(vk::ClearDepthStencilValue(1.0f, 0));
+}
 
 } // end namespace graphics

@@ -8,6 +8,7 @@ namespace graphics
 {
 
 class VulkanDescriptorSet;
+class VulkanRenderPass;
 
 class VulkanShader
 {
@@ -58,7 +59,8 @@ public:
 	~VulkanGraphicsPipeline();
 
 	vk::Device logicalDevice;
-	vk::RenderPass renderpass;
+	std::shared_ptr<VulkanRenderPass> renderPass;
+
 	std::vector<vk::DescriptorSetLayout> descriptorSetLayouts;
 
 	// shader states
@@ -100,7 +102,7 @@ public:
 
 	////////////////////////////////////////////////////////////////////////////
 
-	static std::shared_ptr<VulkanGraphicsPipeline> create(vk::Device logicalDevice, vk::RenderPass renderpass);
+	static std::shared_ptr<VulkanGraphicsPipeline> create(std::shared_ptr<VulkanRenderPass> renderPass);
 
 	///////////////////////////////////////////////////////////////////////////
 
@@ -123,7 +125,7 @@ public:
 	void setRasterizationState(bool clampDepthEnabled = false,
 							   bool rasterDiscardEnabled = false,
 							   vk::PolygonMode polyMode = vk::PolygonMode::eFill,
-							   vk::CullModeFlags culling = vk::CullModeFlagBits::eBack,
+							   vk::CullModeFlags culling = vk::CullModeFlagBits::eNone,
 							   vk::FrontFace frontFace = vk::FrontFace::eCounterClockwise,
 							   bool depthBiasEnabled = false,
 							   float depth_bias_constant_factor = 0.0f,

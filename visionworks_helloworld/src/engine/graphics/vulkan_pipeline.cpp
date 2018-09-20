@@ -2,6 +2,8 @@
 #include "vulkan_device.h"
 #include "vulkan_helper.h"
 #include "vulkan_descriptor_set.h"
+#include "vulkan_render_pass.h"
+
 #include <iostream>
 
 namespace graphics
@@ -66,13 +68,13 @@ VulkanGraphicsPipeline::~VulkanGraphicsPipeline()
 	}
 }
 
-std::shared_ptr<VulkanGraphicsPipeline> VulkanGraphicsPipeline::create(vk::Device logicalDevice, vk::RenderPass renderpass)
+std::shared_ptr<VulkanGraphicsPipeline> VulkanGraphicsPipeline::create(std::shared_ptr<VulkanRenderPass> renderPass)
 {
-	assert(logicalDevice && renderpass);
+	assert(renderPass->logicalDevice && renderPass);
 
 	auto program = std::shared_ptr<VulkanGraphicsPipeline>(new VulkanGraphicsPipeline());
-	program->logicalDevice = logicalDevice;
-	program->renderpass = renderpass;
+	program->logicalDevice = renderPass->logicalDevice;
+	program->renderPass = renderPass;
 
 	// TODO: set default viewport
 	// TODO: tessellationState
@@ -192,22 +194,28 @@ void VulkanGraphicsPipeline::setColorBlendState(bool logicOpEnabled, vk::LogicOp
 	{
 		std::cout << "no attachments specified...use default settings.\n";
 
-		vk::PipelineColorBlendAttachmentState pipeColorBlendAttachment(VK_FALSE);
+		// color blend should not include depth 
+		for (int i = 0; i < (int)renderPass->attachments.size(); ++i)
+		{
+			if (renderPass->attachments[i].finalLayout == vk::ImageLayout::ePresentSrcKHR)
+			{
+				vk::PipelineColorBlendAttachmentState pipeColorBlendAttachment;
 
+				pipeColorBlendAttachment.setColorWriteMask(vk::ColorComponentFlagBits::eR |
+														   vk::ColorComponentFlagBits::eG |
+														   vk::ColorComponentFlagBits::eB |
+														   vk::ColorComponentFlagBits::eA);
 
-		pipeColorBlendAttachment.setColorWriteMask(vk::ColorComponentFlagBits::eR |
-												   vk::ColorComponentFlagBits::eG |
-												   vk::ColorComponentFlagBits::eB |
-												   vk::ColorComponentFlagBits::eA);
+				pipeColorBlendAttachment.setSrcColorBlendFactor(vk::BlendFactor::eOne);
+				pipeColorBlendAttachment.setDstColorBlendFactor(vk::BlendFactor::eZero);
+				pipeColorBlendAttachment.setColorBlendOp(vk::BlendOp::eAdd);
+				pipeColorBlendAttachment.setSrcAlphaBlendFactor(vk::BlendFactor::eOne);
+				pipeColorBlendAttachment.setDstAlphaBlendFactor(vk::BlendFactor::eZero);
+				pipeColorBlendAttachment.setAlphaBlendOp(vk::BlendOp::eAdd);
 
-		pipeColorBlendAttachment.setSrcColorBlendFactor(vk::BlendFactor::eOne);
-		pipeColorBlendAttachment.setDstColorBlendFactor(vk::BlendFactor::eZero);
-		pipeColorBlendAttachment.setColorBlendOp(vk::BlendOp::eAdd);
-		pipeColorBlendAttachment.setSrcAlphaBlendFactor(vk::BlendFactor::eOne);
-		pipeColorBlendAttachment.setDstAlphaBlendFactor(vk::BlendFactor::eZero);
-		pipeColorBlendAttachment.setAlphaBlendOp(vk::BlendOp::eAdd);
-
-		d_blendAttachments.push_back(pipeColorBlendAttachment);
+				d_blendAttachments.push_back(pipeColorBlendAttachment);
+			}
+		}
 	}
 
 	colorBlendStateInfo = vk::PipelineColorBlendStateCreateInfo(
@@ -327,7 +335,7 @@ void VulkanGraphicsPipeline::build(vk::PipelineCreateFlags ciFlags)
 		&depthStencilStateInfo,
 		&colorBlendStateInfo,
 		d_dynamicStates.empty() ? nullptr : &dynamicStateinfo,
-		layout, renderpass
+		layout, vk::RenderPass(*renderPass)
 	);
 
 	pipeline = logicalDevice.createGraphicsPipeline({}, ci);
