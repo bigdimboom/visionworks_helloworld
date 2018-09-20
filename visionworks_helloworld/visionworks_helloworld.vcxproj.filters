@@ -16,9 +16,6 @@
     <Filter Include="src\engine\graphics">
       <UniqueIdentifier>{1e20681d-2f19-4319-b00b-048adb2faaaa}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\engine\test">
-      <UniqueIdentifier>{81a96971-6064-4655-a73c-a4fe0dcd9d3c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\engine\camera">
       <UniqueIdentifier>{fba9f85f-9f77-46d0-97dd-bf8530ae1b59}</UniqueIdentifier>
     </Filter>
@@ -27,6 +24,9 @@
     </Filter>
     <Filter Include="src\engine\api">
       <UniqueIdentifier>{49420e3e-0170-4409-b994-85b4fab368be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\test">
+      <UniqueIdentifier>{81a96971-6064-4655-a73c-a4fe0dcd9d3c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -70,7 +70,7 @@
       <Filter>src\engine\graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\test\hello_vulkan_test.cpp">
-      <Filter>src\engine\test</Filter>
+      <Filter>src\test</Filter>
     </ClCompile>
     <ClCompile Include="src\engine\graphics\vulkan_pipeline.cpp">
       <Filter>src\engine\graphics</Filter>
@@ -159,7 +159,7 @@
       <Filter>src\engine\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\test\hello_vulkan_test.h">
-      <Filter>src\engine\test</Filter>
+      <Filter>src\test</Filter>
     </ClInclude>
     <ClInclude Include="src\engine\graphics\vulkan_pipeline.h">
       <Filter>src\engine\graphics</Filter>
