@@ -1,5 +1,5 @@
 #pragma once
-#include "../camera/camera_base.h"
+#include <vulkan/vulkan.hpp>
 
 namespace renderer
 {
@@ -10,7 +10,7 @@ public:
 	virtual ~IRenderable() {}
 
 	virtual void initData() = 0;
-	virtual void render(cam::CameraBase* cam) = 0;
+	virtual vk::CommandBuffer render(uint32_t frameID) = 0;
 	virtual void cleanup() = 0;
 };
 

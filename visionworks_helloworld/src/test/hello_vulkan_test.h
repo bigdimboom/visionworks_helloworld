@@ -5,8 +5,9 @@
 
 #include "../engine/graphics/vulkan_buffer.h"
 #include "../engine/graphics/vulkan_pipeline.h"
-
 #include "../engine/camera/free_camera.h"
+#include "../engine/renderer/gui_overlay.h"
+
 
 #include <glm/glm.hpp>
 
@@ -63,6 +64,7 @@ private:
 	std::vector<vk::Semaphore> d_imageRenderingSemaphore;
 	std::vector<vk::Fence> d_fence;
 
+	std::shared_ptr<renderer::GuiOverlay> d_ui;
 
 	void cameraMotion(float xpos, float ypos, bool& firstMouse);
 };

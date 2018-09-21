@@ -48,7 +48,7 @@ public:
 	/**  @brief Typecast to VkDevice */
 	operator vk::RenderPass() { return renderpass; };
 
-	static std::shared_ptr<VulkanRenderPass> create(
+	static std::shared_ptr<VulkanRenderPass> createDefault(
 		std::shared_ptr<VulkanSwapChain> swapChain,
 		std::shared_ptr<VulkanDepthResource> depth
 	);
@@ -78,7 +78,7 @@ private:
 	void operator=(const VulkanRenderPass&) = delete;
 	void operator=(VulkanRenderPass&&) = delete;
 
-	struct 
+	struct
 	{
 		vk::SamplerCreateInfo info;
 		vk::Sampler sampler;

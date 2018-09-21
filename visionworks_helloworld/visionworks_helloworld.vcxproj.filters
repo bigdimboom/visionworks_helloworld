@@ -111,6 +111,9 @@
     <ClCompile Include="src\engine\api\imgui_widgets.cpp">
       <Filter>src\engine\api</Filter>
     </ClCompile>
+    <ClCompile Include="src\engine\graphics\vulkan_master_renderer.cpp">
+      <Filter>src\engine\graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\engine\graphics\vulkan_context.h">
@@ -205,6 +208,9 @@
     </ClInclude>
     <ClInclude Include="src\engine\api\imstb_truetype.h">
       <Filter>src\engine\api</Filter>
+    </ClInclude>
+    <ClInclude Include="src\engine\graphics\vulkan_master_renderer.h">
+      <Filter>src\engine\graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

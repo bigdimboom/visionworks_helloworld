@@ -204,7 +204,7 @@ bool HelloVulkanTest::init()
 	{
 		auto& command = d_commands[i];
 
-		command.begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eRenderPassContinue));
+		command.begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eSimultaneousUse));
 		{
 			command.beginRenderPass(vk::RenderPassBeginInfo(vulkanContext()->defaultRenderPass->renderpass, vulkanContext()->defaultRenderPass->frameBuffers[i], vk::Rect2D({}, res),
 				(uint32_t)vulkanContext()->defaultRenderPass->clearValues.size(), vulkanContext()->defaultRenderPass->clearValues.data()),
@@ -234,6 +234,9 @@ bool HelloVulkanTest::init()
 		d_fence[i] = vk::Device(*vulkanContext()->device).createFence(vk::FenceCreateInfo(vk::FenceCreateFlagBits::eSignaled));
 	}
 
+	d_ui = std::shared_ptr<renderer::GuiOverlay>(new renderer::GuiOverlay(dispatcher(), vulkanContext()));
+	d_ui->initData();
+
 	return true;
 }
 
@@ -245,6 +248,16 @@ void HelloVulkanTest::render()
 {
 	// TODO: adding present
 	static uint32_t index = 0;
+
+	d_ui->startFrame();
+	{
+		ImGui::Begin("transform data.");
+		ImGui::Text("fps average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+		ImGui::Separator();
+		ImGui::End();
+	}
+	d_ui->endFrame();
+
 	index = vulkanContext()->swapChain->acquireNewFrame(d_imageAcquiringSemaphore[index]);
 
 	vk::PipelineStageFlags flags = vk::PipelineStageFlagBits::eColorAttachmentOutput | vk::PipelineStageFlagBits::eAllGraphics;
@@ -252,10 +265,15 @@ void HelloVulkanTest::render()
 	vk::Device(*vulkanContext()->device).waitForFences(1, &d_fence[index], VK_TRUE, UINT64_MAX);
 	vk::Device(*vulkanContext()->device).resetFences(1, &d_fence[index]);
 
+	static std::vector<vk::CommandBuffer> commands(10);
+	commands.clear();
+	commands.push_back(d_commands[index]);
+	commands.push_back(d_ui->render(index));
+
 	vk::SubmitInfo submitinfo;
 	submitinfo.setPWaitDstStageMask(&flags);
-	submitinfo.setCommandBufferCount(1);
-	submitinfo.setPCommandBuffers(&d_commands[index]);
+	submitinfo.setCommandBufferCount((uint32_t)commands.size());
+	submitinfo.setPCommandBuffers(commands.data());
 
 	submitinfo.setWaitSemaphoreCount(1);
 	submitinfo.setPWaitSemaphores(&d_imageAcquiringSemaphore[index]);

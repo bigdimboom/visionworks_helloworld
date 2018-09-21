@@ -24,8 +24,9 @@ public:
 	~GuiOverlay();
 
 	void initData() override;
-	void prepareUI();
-	void render(cam::CameraBase* cam) override;
+	void startFrame();
+	void endFrame();
+	vk::CommandBuffer render(uint32_t frameID) override;
 	void cleanup() override;
 
 

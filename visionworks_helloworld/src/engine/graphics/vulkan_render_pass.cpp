@@ -50,8 +50,8 @@ VulkanRenderPass::~VulkanRenderPass()
 	}
 }
 
-std::shared_ptr<VulkanRenderPass> VulkanRenderPass::create(std::shared_ptr<VulkanSwapChain> swapChain,
-														   std::shared_ptr<VulkanDepthResource> depth)
+std::shared_ptr<VulkanRenderPass> VulkanRenderPass::createDefault(std::shared_ptr<VulkanSwapChain> swapChain,
+																  std::shared_ptr<VulkanDepthResource> depth)
 {
 	assert(swapChain && depth);
 	assert(swapChain->logicalDevice == depth->logicalDevice);
@@ -112,28 +112,39 @@ std::shared_ptr<VulkanRenderPass> VulkanRenderPass::create(std::shared_ptr<Vulka
 
 	// TODO: it might be bug here.
 	// Subpass dependencies for layout transitions
-	std::array<vk::SubpassDependency, 2> dependencies;
+	//std::array<vk::SubpassDependency, 2> dependencies;
+	//dependencies[0].setSrcSubpass(VK_SUBPASS_EXTERNAL);
+	//dependencies[0].setDstSubpass(0);
+	//dependencies[0].setSrcStageMask(vk::PipelineStageFlagBits::eBottomOfPipe);
+	//dependencies[0].setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
+	//dependencies[0].setSrcAccessMask(vk::AccessFlagBits::eMemoryRead);
+	//dependencies[0].setDstAccessMask(vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite);
+	//dependencies[0].setDependencyFlags(vk::DependencyFlagBits::eByRegion);
+
+	//dependencies[1].setSrcSubpass(0);
+	//dependencies[1].setDstSubpass(VK_SUBPASS_EXTERNAL);
+	//dependencies[1].setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
+	//dependencies[1].setDstStageMask(vk::PipelineStageFlagBits::eBottomOfPipe);
+	//dependencies[1].setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite);
+	//dependencies[1].setDstAccessMask(vk::AccessFlagBits::eMemoryRead);
+	//dependencies[1].setDependencyFlags(vk::DependencyFlagBits::eByRegion);
+
+	//rpData->denpendencies.push_back(dependencies[0]);
+	//rpData->denpendencies.push_back(dependencies[1]);
+
+	std::array<vk::SubpassDependency, 1> dependencies;
 	dependencies[0].setSrcSubpass(VK_SUBPASS_EXTERNAL);
 	dependencies[0].setDstSubpass(0);
-	dependencies[0].setSrcStageMask(vk::PipelineStageFlagBits::eBottomOfPipe);
+	dependencies[0].setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
 	dependencies[0].setDstStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
-	dependencies[0].setSrcAccessMask(vk::AccessFlagBits::eMemoryRead);
+	dependencies[0].setSrcAccessMask(vk::AccessFlagBits::eMemoryRead | vk::AccessFlagBits::eMemoryWrite);
 	dependencies[0].setDstAccessMask(vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite);
 	dependencies[0].setDependencyFlags(vk::DependencyFlagBits::eByRegion);
 
-	dependencies[1].setSrcSubpass(0);
-	dependencies[1].setDstSubpass(VK_SUBPASS_EXTERNAL);
-	dependencies[1].setSrcStageMask(vk::PipelineStageFlagBits::eColorAttachmentOutput);
-	dependencies[1].setDstStageMask(vk::PipelineStageFlagBits::eBottomOfPipe);
-	dependencies[1].setSrcAccessMask(vk::AccessFlagBits::eColorAttachmentRead | vk::AccessFlagBits::eColorAttachmentWrite);
-	dependencies[1].setDstAccessMask(vk::AccessFlagBits::eMemoryRead);
-	dependencies[1].setDependencyFlags(vk::DependencyFlagBits::eByRegion);
-
 	rpData->denpendencies.push_back(dependencies[0]);
-	rpData->denpendencies.push_back(dependencies[1]);
 
 	vk::RenderPassCreateInfo renderPassInfo(vk::RenderPassCreateFlags(),
-											(uint32_t)rpData->attachments.size(),
+		(uint32_t)rpData->attachments.size(),
 											rpData->attachments.data(),
 											(uint32_t)rpData->subpasses.size(),
 											rpData->subpasses.data(),
@@ -184,8 +195,8 @@ std::shared_ptr<VulkanRenderPass> VulkanRenderPass::create(std::shared_ptr<Vulka
 	return rpData;
 }
 
-vk::Sampler VulkanRenderPass::acquireSampler(vk::Filter magFilter, 
-											 vk::Filter minFilter, 
+vk::Sampler VulkanRenderPass::acquireSampler(vk::Filter magFilter,
+											 vk::Filter minFilter,
 											 vk::SamplerAddressMode adressMode)
 {
 	assert(physicalDevice && logicalDevice);

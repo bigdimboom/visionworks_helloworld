@@ -73,7 +73,7 @@ std::shared_ptr<VulkanContext> VulkanContext::create(std::shared_ptr<VulkanWindo
 
 	context->depthResource = VulkanDepthResource::create(extent, GPUList[physicalDeviceID], context->device->logicalDevice);
 
-	context->defaultRenderPass = VulkanRenderPass::create(context->swapChain, context->depthResource);
+	context->defaultRenderPass = VulkanRenderPass::createDefault(context->swapChain, context->depthResource);
 
 	return context;
 }

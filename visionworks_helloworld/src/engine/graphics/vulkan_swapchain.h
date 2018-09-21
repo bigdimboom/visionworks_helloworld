@@ -41,7 +41,7 @@ public:
 												   vk::Format format = vk::Format::eB8G8R8A8Unorm,
 												   vk::ColorSpaceKHR color = vk::ColorSpaceKHR::eSrgbNonlinear,
 												   vk::SwapchainKHR oldSwapChain = nullptr,
-												   int frameCount = 2, int imageArrayLayers = 1);
+												   int frameCount = 3, int imageArrayLayers = 1);
 
 	// MEMBER FUNCTIONS
 	uint32_t acquireNewFrame(vk::Semaphore sema, vk::Fence fence = nullptr);

@@ -35,13 +35,27 @@ GuiOverlay::GuiOverlay(std::shared_ptr<se::dispatcher> dispatcher, std::shared_p
 
 GuiOverlay::~GuiOverlay()
 {
+	if (!d_commands.empty())
+	{
+		vk::Device(*d_context->device).freeCommandBuffers(d_context->device->graphicsCmdPool, d_commands);
+		d_commands.clear();
+
+		ImGui_ImplVulkan_Shutdown();
+		ImGui_ImplSDL2_Shutdown();
+		ImGui::DestroyContext();
+	}
 }
 
-void GuiOverlay::prepareUI()
+void GuiOverlay::startFrame()
 {
 	ImGui_ImplVulkan_NewFrame();
 	ImGui_ImplSDL2_NewFrame((SDL_Window*)d_context->window->intenalPointer());
 	ImGui::NewFrame();
+}
+
+void GuiOverlay::endFrame()
+{
+	ImGui::Render();
 }
 
 void GuiOverlay::initData()
@@ -60,7 +74,6 @@ void GuiOverlay::initData()
 	ImGui_ImplVulkan_Init(&d_init_info, vk::RenderPass(*d_context->defaultRenderPass));
 	ImGui::StyleColorsDark();
 
-	// TODO:
 	{
 		vk::CommandPool command_pool = d_context->device->graphicsCmdPool;
 		auto tmpCmdBuffer = vk::Device(*d_context->device).allocateCommandBuffers(vk::CommandBufferAllocateInfo(command_pool, vk::CommandBufferLevel::ePrimary, 1))[0];
@@ -82,26 +95,36 @@ void GuiOverlay::initData()
 	}
 
 	d_commands = vk::Device(*d_context->device).allocateCommandBuffers(
-		vk::CommandBufferAllocateInfo(d_context->device->graphicsCmdPool, vk::CommandBufferLevel::ePrimary, d_context->swapChain->frameCount)
-	);
+		vk::CommandBufferAllocateInfo(d_context->device->graphicsCmdPool,
+		vk::CommandBufferLevel::ePrimary,
+		d_context->swapChain->frameCount));
 }
 
-void GuiOverlay::render(cam::CameraBase* cam)
+vk::CommandBuffer GuiOverlay::render(uint32_t frameID)
 {
-	ImGui::Render();
+	assert(frameID >= 0 && frameID < d_commands.size());
 
-	// TODO:
-	//uint32_t& frameIndex = d_vulkan.getFrameData().frameIndex;
-	auto& cmd = d_commands[0];
+	auto& command = d_commands[frameID];
 
-	vk::CommandBufferInheritanceInfo info(vk::RenderPass(*d_context->defaultRenderPass));
-	cmd.begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eRenderPassContinue, &info));
+	//vk::CommandBufferInheritanceInfo info(vk::RenderPass(*d_context->defaultRenderPass));
+
+	//static vk::RenderPassBeginInfo renderPassInfo(d_context->defaultRenderPass->renderpass,
+	//											  d_context->defaultRenderPass->frameBuffers[frameID],
+	//											  vk::Rect2D({}, d_context->swapChain->actualExtent),
+	//											  (uint32_t)d_context->defaultRenderPass->clearValues.size(),
+	//											  d_context->defaultRenderPass->clearValues.data());
+
+	//renderPassInfo.framebuffer = d_context->defaultRenderPass->frameBuffers[frameID];
+
+	command.begin(vk::CommandBufferBeginInfo(vk::CommandBufferUsageFlagBits::eSimultaneousUse, nullptr));
 	{
-		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), cmd);
+		//command.beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), command);
+		//command.endRenderPass();
 	}
-	cmd.end();
+	command.end();
 
-	//d_vulkan.addRenderPassCommands(cmd);
+	return command;
 }
 
 void GuiOverlay::cleanup()
