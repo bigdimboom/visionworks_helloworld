@@ -26,7 +26,7 @@ public:
 	void initData() override;
 	void startFrame();
 	void endFrame();
-	vk::CommandBuffer render(uint32_t frameID) override;
+	vk::CommandBuffer render(uint32_t frameID, vk::RenderPass renderPass) override;
 	void cleanup() override;
 
 

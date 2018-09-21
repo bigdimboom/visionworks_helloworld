@@ -10,7 +10,7 @@ public:
 	virtual ~IRenderable() {}
 
 	virtual void initData() = 0;
-	virtual vk::CommandBuffer render(uint32_t frameID) = 0;
+	virtual vk::CommandBuffer render(uint32_t frameID, vk::RenderPass renderPass) = 0;
 	virtual void cleanup() = 0;
 };
 

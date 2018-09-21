@@ -100,7 +100,7 @@ void GuiOverlay::initData()
 		d_context->swapChain->frameCount));
 }
 
-vk::CommandBuffer GuiOverlay::render(uint32_t frameID)
+vk::CommandBuffer GuiOverlay::render(uint32_t frameID,vk::RenderPass renderPass)
 {
 	assert(frameID >= 0 && frameID < d_commands.size());
 

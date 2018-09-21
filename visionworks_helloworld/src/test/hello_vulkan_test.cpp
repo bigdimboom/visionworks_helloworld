@@ -268,7 +268,7 @@ void HelloVulkanTest::render()
 	static std::vector<vk::CommandBuffer> commands(10);
 	commands.clear();
 	commands.push_back(d_commands[index]);
-	commands.push_back(d_ui->render(index));
+	commands.push_back(d_ui->render(index, nullptr));
 
 	vk::SubmitInfo submitinfo;
 	submitinfo.setPWaitDstStageMask(&flags);
